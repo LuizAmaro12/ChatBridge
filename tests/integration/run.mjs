@@ -6,6 +6,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import WebSocket, { WebSocketServer } from 'ws';
+import { openAndWaitForClose } from './lifecycle.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const evidence = process.env.EVIDENCE_DIR ? path.resolve(process.env.EVIDENCE_DIR) : path.join(root, 'docs/evidence');
@@ -17,10 +18,18 @@ const configs = Object.fromEntries(roles.map((role, i) => [role, {
 const processes = new Map();
 const sockets = new Set();
 const results = [];
+const errors = [];
 const logs = [];
 const started = new Date().toISOString();
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const base = role => `http://127.0.0.1:${configs[role].port}`;
+
+async function writeResults(status = 'RUNNING') {
+  await mkdir(evidence, { recursive: true });
+  await writeFile(path.join(evidence, 'gate1-results.json'), JSON.stringify({ started,
+    ...(status !== 'RUNNING' ? { finished: new Date().toISOString() } : {}),
+    node: process.version, platform: process.platform, status, errors, results }, null, 2) + '\n');
+}
 
 async function test(id, expected, action) {
   const before = Date.now();
@@ -31,6 +40,9 @@ async function test(id, expected, action) {
   } catch (error) {
     results.push({ id, expected, observed: error.message, status: 'FAIL', ms: Date.now() - before });
     throw error;
+  } finally {
+    // Keep completed assertions available even if a later process failure interrupts cleanup.
+    await writeResults();
   }
 }
 
@@ -368,14 +380,18 @@ try {
     await new Promise(resolve => fakePeer.close(resolve));
   }
   await test('T17 cache capacity and retention', 'Cache limitado rejeita excesso e libera após retenção; conexão excedente fecha 1008', async () => {
-    await start('mobile');
+    await start('mobile', { Chat__MaxClients: '1' });
     await start('web', { Chat__CacheLimit: '2', Chat__RetentionSeconds: '2', Chat__MaxClients: '1' });
     await connected();
     web = client('web', tokens.web); mobile = client('mobile', tokens.mobile, { origin: null });
     await Promise.all([web.open(), mobile.open()]);
-    const extra = client('web', tokens.web);
-    const extraClosed = once(extra.ws, 'close'); await extra.open();
-    assert.equal((await extraClosed)[0], 1008);
+    for (const role of roles) {
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const extra = client(role, tokens[role]);
+        const extraClosed = await openAndWaitForClose(extra);
+        assert.equal(extraClosed[0], 1008);
+      }
+    }
     await exchange(web, mobile, 'Cache 1'); await exchange(web, mobile, 'Cache 2');
     const messageId = randomUUID(); web.send({ type: 'chat.send', messageId, content: 'Cache cheio' });
     assert.equal((await web.take(m => m.messageId === messageId)).code, 'busy');
@@ -384,16 +400,30 @@ try {
   });
   console.log('P1 VERIFIED (see documented limits)');
 } catch (error) {
+  errors.push({ phase: 'execution', message: error.message });
   console.error(error.stack);
   process.exitCode = 1;
 } finally {
-  for (const ws of sockets) ws.terminate();
-  for (const role of roles) await stop(role);
-  await mkdir(evidence, { recursive: true });
-  const allLogs = logs.join('\n');
-  for (const secret of [serviceKey, ...roles.flatMap(r => [configs[r].key, configs[r].password]), ...Object.values(tokens ?? {})])
-    assert.equal(allLogs.includes(secret), false, 'Secret appeared in logs');
-  await writeFile(path.join(evidence, 'gate1-results.json'), JSON.stringify({ started, finished: new Date().toISOString(),
-    node: process.version, platform: process.platform, results }, null, 2) + '\n');
-  await writeFile(path.join(evidence, 'gate1-services.txt'), allLogs);
+  await writeResults(process.exitCode ? 'FAIL' : 'RUNNING');
+  try {
+    for (const ws of sockets) ws.terminate();
+    for (const role of roles) {
+      try { await stop(role); }
+      catch (error) {
+        errors.push({ phase: `stop ${role}`, message: error.message });
+        console.error(error.stack);
+        process.exitCode = 1;
+      }
+    }
+    const allLogs = logs.join('\n');
+    for (const secret of [serviceKey, ...roles.flatMap(r => [configs[r].key, configs[r].password]), ...Object.values(tokens ?? {})])
+      assert.equal(allLogs.includes(secret), false, 'Secret appeared in logs');
+    await writeFile(path.join(evidence, 'gate1-services.txt'), allLogs);
+  } catch (error) {
+    errors.push({ phase: 'cleanup/evidence', message: error.message });
+    console.error(error.stack);
+    process.exitCode = 1;
+  } finally {
+    await writeResults(process.exitCode ? 'FAIL' : 'PASS');
+  }
 }

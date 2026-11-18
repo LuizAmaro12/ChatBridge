@@ -54,6 +54,8 @@ jobs:
         run: dotnet run --project tests/transport/TransportChecks.csproj
       - name: Instalar harness
         run: npm ci --prefix tests/integration --no-audit
+      - name: Regressão do ciclo de vida WebSocket
+        run: node --test tests/integration/lifecycle.test.mjs
       - name: Integração com duas APIs reais
         run: node tests/integration/run.mjs
         env:

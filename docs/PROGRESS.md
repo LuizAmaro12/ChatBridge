@@ -1,5 +1,39 @@
 # Progresso — ChatBridge
 
+## CI — correção de encerramento WebSocket e evidências (18/11/2026)
+
+**Correção validada localmente; nova execução no GitHub Actions PENDENTE de publicação.** Branch `chore/ci-github-actions`, inicialmente limpa. Nenhum commit, push ou merge realizado. Regras de negócio, autenticação, protocolo, limites e asserções existentes preservados.
+
+Incidente informado no PR #6, run `44411217128`, job `135179543269`: builds/transporte aprovados, integração até `PASS T17 pending limit`, seguida de dois erros `read ECONNRESET`, sendo o segundo uma rejeição não tratada (Node 24.22.3). A consulta pública ao job retornou 404 e não havia GitHub CLI autenticado; a análise usa o log fornecido pelo responsável. O upload no runner não foi inspecionado diretamente.
+
+### Diagnóstico e correção
+
+- Uma execução original completa passou, confirmando a intermitência. Em cópia temporária com repetição do teste de conexão excedente, a segunda tentativa retornou **1006 em vez de 1008**: [evidência anterior](evidence/ci-websocket-fix/before-close-race.json). As duas APIs enviavam apenas `CloseOutputAsync` e imediatamente executavam `Abort` no descarte. Agora, exclusivamente na rejeição por limite de clientes (onde não existe leitor concorrente), aguardam `WebSocket.CloseAsync`, limitado a dois segundos e cancelável. O limite e o código 1008 permanecem iguais.
+- O harness criava `once(socket, 'close')` antes de aguardar `open()`, mas só observava a primeira Promise depois da abertura. Um erro rejeita ambas; a Promise de fechamento ficava sem tratamento. O teste com reset TCP real reproduziu a rejeição não tratada usando a sequência antiga. `lifecycle.mjs` agora observa ambas imediatamente com `Promise.all`, propagando o erro ao teste. Não há filtro global de ECONNRESET nem de rejeições. Referência: [Node events.once](https://nodejs.org/api/events.html#eventsonceemitter-name-options).
+- `run.mjs` grava checkpoints após cada grupo, com estado RUNNING enquanto incompleto, e registra falhas antes da limpeza. O resultado final distingue PASS/FAIL e erros de execução/limpeza. Uma falha ao parar um processo não impede a tentativa de parar o outro. A verificação de segredos nos logs continua obrigatória. Interrupções abruptas podem deixar somente o último checkpoint, sem logs finais; não são sucesso.
+- Todos os testes e asserções anteriores foram mantidos; o T17 passou a exigir 20 rejeições consecutivas **por API**, todas com código 1008. A CI executa três regressões do harness antes da integração: reset TCP, fechamento imediato 1008 e falha de inicialização com saída 1/evidência FAIL. O upload existente mantém `if: always()`; nenhum `continue-on-error` foi adicionado.
+
+### Validações executadas
+
+Windows local, SDK .NET 10.0.404, Node instalado 24.18.0 e Node oficial portátil 24.22.3 baixado para TEMP com SHA-256 conferido contra SHASUMS256.txt; nenhuma instalação global alterada.
+
+| Comando/cenário | Resultado real |
+|---|---|
+| `dotnet build services/web-api/ChatBridge.Api.csproj --no-restore --nologo` | PASS, zero avisos/erros |
+| `dotnet build services/mobile-api/ChatBridge.Api.csproj --no-restore --nologo` | PASS, zero avisos/erros |
+| `dotnet run --project tests/transport/TransportChecks.csproj` | 4 verificações PASS |
+| `node --test tests/integration/lifecycle.test.mjs` | 3 PASS em 24.18.0 e 24.22.3; reset continua rejeitando, falha de inicialização continua saindo com código 1 |
+| Sequência antiga de Promises em cópia temporária do teste de reset | FAIL esperado: ECONNRESET não tratado |
+| `node tests/integration/run.mjs`, EVIDENCE_DIR separado por execução | 3 rodadas consecutivas, 18 grupos PASS por rodada, Node 24.18.0 |
+| Cópia temporária do harness corrigido, apenas repetição aumentada de 20 para 200 por API | 18 grupos PASS, 400 fechamentos 1008, Node 24.22.3 |
+| actionlint 1.7.12, `node --check tests/integration/run.mjs`, `git diff --check` | PASS |
+
+Uma tentativa de executar as regressões em paralelo com a integração falhou por EADDRINUSE na porta 5001, ocupada pela própria integração. A repetição sequencial passou; o workflow já executa esses passos sequencialmente. Nenhuma asserção foi removida para contornar a falha.
+
+Evidências completas: [rodada 1](evidence/ci-websocket-fix/after-run-1.json), [rodada 2](evidence/ci-websocket-fix/after-run-2.json), [rodada 3](evidence/ci-websocket-fix/after-run-3.json) e [Node 24.22.3/stress](evidence/ci-websocket-fix/after-node24.22.3-stress.json). Todas incluem T04 Web → Mobile e T05 Mobile → Web com messageId, autoria e conteúdo observados. No total, 520 rejeições excedentes verificadas após a correção. Logs brutos permanecem no TEMP local; as evidências históricas não foram sobrescritas.
+
+**Limitação:** os dois defeitos foram reproduzidos localmente, mas a associação exata do reset original à corrida de fechamento no runner ainda depende da nova execução do PR. Windows hospedado e upload efetivo de artifacts NÃO RETESTADOS. Web/Mobile UI e testes físicos NÃO REEXECUTADOS nesta correção de transporte/harness. Próximo passo: revisar e publicar na mesma branch para validar os quatro jobs e o artifact `ci-backends` no GitHub.
+
 ## CI — implementação e validação local (18/11/2026)
 
 **Workflow implementado e validado localmente; execução real no GitHub Actions NÃO EXECUTADA.** Depende de publicação autorizada para confirmação na aba Actions. Nenhum commit, push, merge, deploy ou CD realizado nesta etapa.
