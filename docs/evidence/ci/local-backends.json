@@ -1,0 +1,153 @@
+{
+  "started": "2026-11-18T22:04:17.229Z",
+  "finished": "2026-11-18T22:04:47.358Z",
+  "node": "v24.18.0",
+  "platform": "win32",
+  "results": [
+    {
+      "id": "T01-T03 login",
+      "expected": "200 para contas válidas, 401 genérico para inválidas nas duas APIs",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 184
+    },
+    {
+      "id": "T07-T13-T19 handshake",
+      "expected": "Rejeitar JWT ausente/inválido/cruzado/expirado, serviço sem chave e Origin indevido",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 187
+    },
+    {
+      "id": "T04 web-to-mobile",
+      "expected": "Cliente mobile recebe texto e autor web; remetente recebe ACK correlacionado",
+      "observed": {
+        "messageId": "43e0b77b-99ae-493a-a8a2-0453b0eeb354",
+        "content": "Web → Mobile: integração real",
+        "senderId": "web-demo",
+        "origin": "web"
+      },
+      "status": "PASS",
+      "ms": 104
+    },
+    {
+      "id": "T05 mobile-to-web",
+      "expected": "Cliente web recebe texto e autor mobile; remetente recebe ACK correlacionado",
+      "observed": {
+        "messageId": "3b80d01a-3f93-4a36-a30a-07e7afd664a7",
+        "content": "Mobile → Web: integração real",
+        "senderId": "mobile-demo",
+        "origin": "mobile"
+      },
+      "status": "PASS",
+      "ms": 103
+    },
+    {
+      "id": "T08 trusted identity",
+      "expected": "Campos de identidade falsos não substituem claims autenticadas",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 115
+    },
+    {
+      "id": "T06-T11 validation",
+      "expected": "Rejeitar conteúdo vazio, formato inválido, tipos não permitidos e sala inválida; manter API operacional",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 2096
+    },
+    {
+      "id": "T09-T10 mobile outage",
+      "expected": "Falha sem falso ACK; reiniciar Mobile API recupera ambos sentidos",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 1453
+    },
+    {
+      "id": "T09-T10 web outage",
+      "expected": "Falha mobile sem falso ACK; reiniciar Web API recupera ambos sentidos",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 1083
+    },
+    {
+      "id": "T12 deduplication and concurrency",
+      "expected": "Duplicatas simultâneas geram uma publicação; conflito rejeitado; sem eco",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 575
+    },
+    {
+      "id": "T11 frames",
+      "expected": "Fragmentação válida aceita; binário fecha 1003 e >16KiB fecha 1009",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 243
+    },
+    {
+      "id": "T07 active expiration",
+      "expected": "Socket autenticado fecha 1008 no vencimento sem precisar enviar mensagem",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 1084
+    },
+    {
+      "id": "T15 offline recipient",
+      "expected": "Backend aceita sem dispositivo; reconexão não recebe histórico",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 361
+    },
+    {
+      "id": "T11-T12 remote validation and deduplication",
+      "expected": "Peer inválido recebe erro; duplicata remota publica uma vez e repete ACK",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 626
+    },
+    {
+      "id": "T14 ACK timeout and late ACK",
+      "expected": "Timeout após 5s é incerto; sem reenvio automático; ACK tardio/aleatório ignorado",
+      "observed": {
+        "messageId": "6759afd3-9a35-4ad2-9a1b-9a1a7b70e094",
+        "code": "ack_timeout",
+        "peerReceipts": 1,
+        "elapsedMs": 5432
+      },
+      "status": "PASS",
+      "ms": 5432
+    },
+    {
+      "id": "T14 disconnect during pending ACK",
+      "expected": "Perda após recepção resulta em connection_lost incerto",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 1315
+    },
+    {
+      "id": "T16 heartbeat reconnect",
+      "expected": "Peer sem pong é desconectado e nova conexão ocorre",
+      "observed": {
+        "before": 2,
+        "after": 3,
+        "heartbeatSecondsForTest": 1
+      },
+      "status": "PASS",
+      "ms": 4185
+    },
+    {
+      "id": "T17 pending limit",
+      "expected": "No máximo 100 encaminhamentos pendentes; excesso retorna busy",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 4668
+    },
+    {
+      "id": "T17 cache capacity and retention",
+      "expected": "Cache limitado rejeita excesso e libera após retenção; conexão excedente fecha 1008",
+      "observed": "Asserções satisfeitas",
+      "status": "PASS",
+      "ms": 3914
+    }
+  ]
+}

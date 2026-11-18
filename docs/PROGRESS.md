@@ -1,5 +1,54 @@
 # Progresso — ChatBridge
 
+## CI — implementação e validação local (18/11/2026)
+
+**Workflow implementado e validado localmente; execução real no GitHub Actions NÃO EXECUTADA.** Depende de publicação autorizada para confirmação na aba Actions. Nenhum commit, push, merge, deploy ou CD realizado nesta etapa.
+
+Diagnóstico: Git inicialmente limpo, branch `chore/gate-4-validacao-estabilizacao`, HEAD `769431c9c429d1f3edbc3179d4a5e998a867b91e`; nenhum workflow existente. Avaliação/AGENTS lidos integralmente; documentação, segurança Gate 4, manifests/lockfiles, configurações e scripts consultados. Plano apresentado antes da implementação. Riscos principais: diferenças do Windows hospedado, downloads de ferramentas, disponibilidade do Edge e alertas npm.
+
+Criados `.github/workflows/ci.yml`, `scripts/ci/audit.mjs` e `scripts/ci/audit.test.mjs`; README, DECISIONS, TEST_PLAN e este registro atualizados. Evidências locais em `docs/evidence/ci/`. Nenhuma alteração em endpoints, autenticação, protocolo, telas, testes funcionais existentes, manifests/lockfiles ou .env.
+
+Quatro jobs isolados Windows Server 2025: backends (restore locked/build Debug/transporte/integração), Web (npm ci/typecheck/lint/build/Edge/W01–W08), Mobile (npm ci/typecheck/seis testes/Expo Doctor 1.21.8/export Android) e auditoria informativa. Gatilhos: PR para main, push main e workflow_dispatch. Permissões contents:read, credencial Git não persistida, Node 24, SDK de global.json, cache npm por lockfile, timeouts 15–25 minutos, cancelamento de execuções antigas do mesmo PR. Artifacts com retenção sete dias e EVIDENCE_DIR no TEMP do runner; sem sobrescrever histórico.
+
+### Validações reais desta implementação
+
+Executada cópia limpa por `git archive HEAD` em TEMP, sem .env, node_modules ou bin/obj existentes. Windows local, PowerShell 5.1, Node 24.18.0, npm 11.16.0, SDK 10.0.404 e Edge instalado. Isso não emula as actions de setup/cache/upload nem o PowerShell 7 do runner.
+
+| Verificação | Resultado |
+|---|---|
+| actionlint 1.7.12 | Exit 0 final; detectou inicialmente runner.temp em env de job, corrigido para env de passo |
+| npm ci nos três projetos | Exit 0; instalação por lockfiles em cópia limpa |
+| Restore --locked-mode das duas APIs | Exit 0 |
+| Dois builds --no-restore | Exit 0, zero avisos/erros |
+| Testes de transporte .NET | 4 aprovados |
+| Integração entre APIs reais | 18 grupos aprovados |
+| Web typecheck/lint/build | Exit 0 |
+| Playwright W01–W08 | 8 aprovados, 37,4s, APIs reais/Edge isolado |
+| Mobile typecheck/test | Exit 0; 6 testes aprovados |
+| Expo Doctor 1.21.8 | 20/20 checks |
+| Exportação Mobile | Exit 0; 621 módulos, bundle Android/Hermes, não APK |
+| Coletor de auditoria | 3 testes aprovados; quatro consultas reais também validadas sem node_modules |
+| Registro npm propositalmente indisponível | Exit 1 esperado; quatro collection_error registrados, sem falso zero |
+| git diff --check | Exit 0 |
+
+[Registro de comandos, ambiente e limitações](evidence/ci/validation.json), [backend](evidence/ci/local-backends.json), [Web](evidence/ci/local-web.json), [auditoria atual](evidence/ci/results.json) e [falha controlada de consulta](evidence/ci/audit-unavailable.json).
+
+Revisão final: actionlint e git diff --check aprovados; JSONs novos válidos, links locais sem ausências, 178 arquivos rastreados/novos comparados com os segredos locais conhecidos sem ocorrências. Diff confirmou produto, testes funcionais existentes, global.json, fontes de verdade e evidências históricas preservados. Essa checagem não equivale a varredura de histórico remoto ou garantia sobre segredos desconhecidos.
+
+O npm avisou sobre lifecycle script esbuild ainda não aprovado durante instalação Mobile; testes/export passaram sem alterar allowScripts global. Next informou ausência de cache de build, esperado na cópia limpa. Instalador Edge foi conferido com dry-run; não foi reinstalado no computador. A CI executará a preparação real do navegador no runner.
+
+### Auditoria: coleta informativa não é aprovação de segurança
+
+Baseline Gate 4 preservado: Web 12 altos/produção 0; Mobile 27 (25 altos/2 moderados) em ambas consultas. **A resposta atual do registro**, sem atualização de dependências, retornou Web 0/0 e Mobile **3 moderados** nos dois modos, com advisory minimatch GHSA-g3hv-75wg-m249. Picomatch não foi reportado nessa resposta atual. Não atribuir essa variação a correção aplicada nem substituir o histórico: nenhuma atualização foi realizada. Relatórios brutos separados em evidence/ci.
+
+Coletor preserva códigos npm e todas as severidades. Vulnerabilidades reportadas geram avisos e resumo, mas não falham a coleta. JSON inválido, timeout, falha de endpoint ou exit inconsistente fazem o job falhar. Não há continue-on-error genérico. A política inicial é informativa inclusive para novos alertas; comparação bloqueante de novos advisories/severidade é evolução futura, não implementada implicitamente.
+
+### Pendências e próximo passo
+
+NÃO EXECUTADOS: runner hospedado, download/cache das actions, upload/expiração de artifacts e instalador real Edge no runner. Android físico/manual não repetido nesta etapa e não configurado no runner comum. Gates anteriores continuam evidências independentes; o responsável relatou também validação manual, não executada pelo agente nesta etapa.
+
+Após autorização para publicar, abrir PR para main, conferir os quatro jobs/steps, resumo de auditoria e artifacts. Falhas funcionais devem deixar o job vermelho; passos dependentes pulados são não executados. workflow_dispatch torna-se disponível quando o arquivo existir na branch padrão. Sem alegação de CI verde antes dessa execução; nenhuma expansão de produto ou deploy autorizada.
+
 ## Gate 4 — resultado final (18/11/2026)
 
 **APROVADO COM RESSALVAS para avaliação local do MVP.** Regressão funcional aprovada; dependências npm ainda têm alertas conhecidos. Não é aprovação para produção nem declaração de segurança total. Nenhum commit, push, merge ou deploy realizado.

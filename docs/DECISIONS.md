@@ -1,5 +1,16 @@
 # Decisões — 17/11/2026
 
+## CI — 18/11/2026
+
+- Quatro jobs independentes em `windows-2025`: menor distância em relação ao ambiente validado, incluindo encerramento de processos .NET/Node e Edge. Imagem hospedada é atualizada pelo GitHub, não equivale ao Windows local. [Inventário oficial](https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md). A primeira execução hospedada continua necessária.
+- Actions oficiais nas majors estáveis consultadas: [checkout v7](https://github.com/actions/checkout), [setup-node v7](https://github.com/actions/setup-node), [setup-dotnet v6](https://github.com/actions/setup-dotnet), [upload-artifact v7](https://github.com/actions/upload-artifact). Sem PAT/secrets pessoais; contents:read e persist-credentials:false. Tags major recebem correções upstream; SHA imutável não foi adotado nesta configuração inicial.
+- SDK lido de global.json; builds Debug porque harnesses usam esse caminho. APIs restauradas em modo locked; npm ci nos três projetos. Cache npm por lockfile, sem cache NuGet adicional pela pequena árvore e simplicidade. Node fixado na major 24; patch acompanha setup-node. Expo Doctor fixado em 1.21.8 via npx, sem alterar package.json/lockfiles do produto.
+- Web inclui W01–W08 com configuração existente, um worker e Microsoft Edge preparado explicitamente por Playwright. Portas 3000/5001/5002 isoladas por job. Sem mudança nos cenários, UI ou APIs.
+- Mobile exporta Hermes; testes físicos são locais e não substituídos por navegador/emulador fictício no runner. Sem APK/deploy.
+- Auditoria lê lockfiles sem instalar dependências ou executar lifecycle scripts. Coletor conserva quatro relatórios, stderr, contagens/exit codes e resumo; vulnerabilidade exit 1 com relatório íntegro gera aviso informativo, enquanto falha de coleta faz o job falhar. Não usar continue-on-error genérico ou ocultar saída. Baseline histórico não é lista automática de exceções; novos alertas também serão informativos até política aprovada.
+- Evidências temporárias com EVIDENCE_DIR, upload mesmo após falhas e retenção sete dias. Sem traces/vídeos da autenticação, sem .env ou upload genérico do workspace. Cancelamento apenas de execuções antigas do mesmo PR.
+- Sem alterações funcionais, dependências do produto, configurações locais, commit/push/merge/deploy. Workflow validado localmente deve ser confirmado na aba Actions após publicação autorizada.
+
 ## Gate 4 — estabilização (18/11/2026)
 
 - Arquitetura, protocolo, implementação dos quatro componentes e versões preservados: a regressão não justificou alteração funcional. Ajuste nos quatro arquivos de harness/reporter permite `EVIDENCE_DIR` opcional e preserva evidências históricas; defaults anteriores mantidos.

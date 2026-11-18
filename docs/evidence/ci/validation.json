@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-18",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Validação local Windows; NÃO é execução hospedada no GitHub Actions",
+  "sourceCommit": "769431c9c429d1f3edbc3179d4a5e998a867b91e",
+  "environment": { "node": "24.18.0", "npm": "11.16.0", "dotnetSdk": "10.0.404", "shell": "Windows PowerShell 5.1", "browser": "Microsoft Edge headless" },
+  "cleanCopy": "git archive HEAD extraído em diretório temporário; sem .env pessoais, node_modules ou bin/obj pré-existentes",
+  "checks": [
+    { "command": "actionlint 1.7.12 .github/workflows/ci.yml", "exitCode": 0, "note": "Primeira validação identificou runner.temp em env de job; movido para env de passo e repetido com sucesso." },
+    { "command": "npm ci --no-audit", "directories": ["apps/web", "apps/mobile", "tests/integration"], "exitCode": 0, "note": "184 pacotes Web, 458 Mobile e 1 integração. npm avisou sobre script esbuild não aprovado; os checks Mobile posteriores passaram sem mudar configuração global." },
+    { "command": "dotnet restore services/{web,mobile}-api/ChatBridge.Api.csproj --locked-mode", "exitCode": 0, "note": "Executado separadamente para cada API." },
+    { "command": "dotnet build services/{web,mobile}-api/ChatBridge.Api.csproj --no-restore --nologo", "exitCode": 0, "warnings": 0, "errors": 0 },
+    { "command": "dotnet run --project tests/transport/TransportChecks.csproj", "exitCode": 0, "passed": 4 },
+    { "command": "node tests/integration/run.mjs", "exitCode": 0, "passed": 18, "report": "local-backends.json" },
+    { "directory": "apps/web", "commands": ["npm run typecheck", "npm run lint", "npm run build"], "exitCode": 0 },
+    { "directory": "apps/web", "command": "npx --no-install playwright install --dry-run msedge", "exitCode": 0, "note": "Instalador real do Edge não executado localmente; navegador existente utilizado. CI prepara Edge explicitamente." },
+    { "directory": "apps/web", "command": "npm test", "exitCode": 0, "passed": 8, "durationSeconds": 37.4, "report": "local-web.json" },
+    { "directory": "apps/mobile", "command": "npm run typecheck", "exitCode": 0 },
+    { "directory": "apps/mobile", "command": "npm test", "exitCode": 0, "passed": 6, "durationMs": 12691.69 },
+    { "directory": "apps/mobile", "command": "npx --yes expo-doctor@1.21.8", "exitCode": 0, "passed": 20 },
+    { "directory": "apps/mobile", "command": "npm run export", "exitCode": 0, "modules": 621, "note": "Android/Hermes; não APK." },
+    { "command": "node --test scripts/ci/audit.test.mjs", "exitCode": 0, "passed": 3 },
+    { "command": "node scripts/ci/audit.mjs", "exitCode": 0, "note": "Validado também sem node_modules, somente manifests/lockfiles. Quatro consultas; vulnerabilidades informativas não mudam exit da coleta.", "report": "results.json" },
+    { "command": "node scripts/ci/audit.mjs com npm_config_registry=http://127.0.0.1:9 e npm_config_fetch_retries=0", "exitCode": 1, "expected": true, "note": "Falha controlada de consulta; quatro collection_error preservados; variáveis apenas no processo.", "report": "audit-unavailable.json" },
+    { "command": "git diff --check", "exitCode": 0 }
+  ],
+  "notExecuted": [
+    "Execução real dos jobs em windows-2025 no GitHub; requer publicação autorizada.",
+    "Setup/cache/download das actions e upload/retention de artifacts no GitHub.",
+    "Instalação real do Edge pelo comando de CI; localmente usado Edge existente e dry-run do instalador.",
+    "Android físico/ADB, validação manual, APK, deploy e CD nesta etapa."
+  ],
+  "auditNote": "Registro atual retornou Web 0/0 e Mobile 3 moderados em ambos modos; baseline Gate 4 12/0 e 27/27 preservado. Nenhum pacote atualizado; não alegar correção do projeto ou segurança total por mudança de resposta do registro."
+}
