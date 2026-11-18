@@ -1,0 +1,48 @@
+{
+  "started": "2026-11-18T00:59:13.017Z",
+  "finished": "2026-11-18T00:59:44.586Z",
+  "status": "passed",
+  "browser": "Microsoft Edge (Playwright, isolated headless context)",
+  "results": [
+    {
+      "title": "W01 login obrigatório, inválido, carregamento e sucesso real",
+      "status": "passed",
+      "durationMs": 1770
+    },
+    {
+      "title": "W02 Web ↔ Mobile real, autoria, ACK, texto seguro e compositor",
+      "status": "passed",
+      "durationMs": 1058
+    },
+    {
+      "title": "W03 serviço remoto indisponível, rascunho e recuperação",
+      "status": "passed",
+      "durationMs": 1797
+    },
+    {
+      "title": "W04 queda da Web API, reconexão e logout sem reconexões posteriores",
+      "status": "passed",
+      "durationMs": 3450
+    },
+    {
+      "title": "W05 responsividade, textos longos e rolagem preservada",
+      "status": "passed",
+      "durationMs": 1546
+    },
+    {
+      "title": "W07 ACK perdido no navegador: resultado incerto, sem replay ou confirmação tardia",
+      "status": "passed",
+      "durationMs": 13224
+    },
+    {
+      "title": "W08 falha conhecida recebida da API recupera o texto",
+      "status": "passed",
+      "durationMs": 1764
+    },
+    {
+      "title": "W06 sessão curta expira e exige novo login",
+      "status": "passed",
+      "durationMs": 4102
+    }
+  ]
+}

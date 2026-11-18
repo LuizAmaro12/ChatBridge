@@ -2,7 +2,7 @@
 
 MVP de chat entre Next.js/TypeScript e React Native/Expo, cada cliente ligado exclusivamente à sua API ASP.NET Core. As duas APIs trocam mensagens por WebSocket full-duplex.
 
-**Estado: Gate 1 — APIs implementadas; evidências e limitações em [PROGRESS](docs/PROGRESS.md).** Frontends ainda não implementados. Fontes de verdade: [Avaliacao.MD](Avaliacao.MD) e [AGENTS.md](AGENTS.md), preservadas. Prazo: 19/11/2026, quinta-feira, 13h (America/Sao_Paulo).
+**Estado: Gate 2 — APIs e frontend Web implementados; evidências e limitações em [PROGRESS](docs/PROGRESS.md).** Aplicativo React Native/Expo ainda não implementado (Gate 3). Fontes de verdade: [Avaliacao.MD](Avaliacao.MD) e [AGENTS.md](AGENTS.md), preservadas. Prazo: 19/11/2026, quinta-feira, 13h (America/Sao_Paulo).
 
 ## Estrutura
 
@@ -17,7 +17,7 @@ docs/               Arquitetura, contrato, decisões, testes e evidências
 
 ## Pré-requisitos e execução das APIs
 
-SDK .NET 10.0.404 (fixado em global.json), Node 24 e npm para o harness de integração. SDK 10 instalado e validado lado a lado com 9.0.301. Android/AVD e versões Next.js/Expo pertencem aos próximos gates.
+SDK .NET 10.0.404 (fixado em global.json), Node 24 e npm. SDK 10 instalado e validado lado a lado com 9.0.301. Web: Next.js 16.4.6, React 19.3.1 e TypeScript 5.9, com lockfile. Android/AVD e Expo pertencem ao Gate 3.
 
 Na raiz, em PowerShell:
 
@@ -77,5 +77,6 @@ No emulador Android padrão, Mobile API: `http://10.0.2.2:5002`. No dispositivo 
 - [Decisões e limitações](docs/DECISIONS.md)
 - [Plano de testes](docs/TEST_PLAN.md)
 - [Progresso, ambiente e riscos](docs/PROGRESS.md)
+- [Identidade visual Web/Mobile](docs/UI_UX.md)
 
-Sem banco, Docker obrigatório, publicação ou histórico persistente. ACK indica aceitação pelo backend remoto, nunca entrega/leitura. Gate 2 depende de revisão e autorização explícita.
+Sem banco, Docker obrigatório, publicação ou histórico persistente. ACK indica aceitação pelo backend remoto, nunca entrega/leitura. Gate 3 depende de revisão e autorização explícita.
