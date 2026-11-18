@@ -1,0 +1,18 @@
+[
+  {
+    "direction": "browser → Web API → Mobile API → test client",
+    "type": "chat.message",
+    "messageId": "5f9d15a7-88f8-4be6-9622-06654c281120",
+    "roomId": "general",
+    "senderId": "web-demo",
+    "senderName": "Usuário Web",
+    "origin": "web",
+    "content": "Olá, Mobile! A conversa já está funcionando.",
+    "timestamp": "2026-11-18T00:59:17.0742641Z"
+  },
+  {
+    "direction": "test client → Mobile API → Web API → browser",
+    "messageId": "39226d36-6809-480d-bf41-80860723e525",
+    "content": "Olá, Web! Recebi sua mensagem.\nVamos conversar por aqui."
+  }
+]

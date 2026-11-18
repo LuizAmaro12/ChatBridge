@@ -1,5 +1,17 @@
 # Decisões — 17/11/2026
 
+## Gate 2 — frontend Web
+
+- Next.js App Router 16.4.6 e React 19.3.1, versões estáveis consultadas no registro npm e compatíveis com Node 24.18.0. Sem API routes/proxy de chat no Next: o navegador chama exclusivamente a Web API existente.
+- Sessão em estado React, HTTP em lib/api, protocolo tipado/validado em lib/protocol e ciclo de vida WS em lib/chat-client. useSyncExternalStore conecta o transporte aos componentes, sem biblioteca de estado adicional. Token não é persistido; logout fecha conexão/cancela timers e remove sessão.
+- Mantido o protocolo dos backends. Mensagens próprias não têm horário fabricado: o ACK não contém timestamp, portanto horário é exibido só nos envelopes recebidos. Deduplicação visual por origem/ID; respostas tardias não alteram estado terminal.
+- Reconexão do navegador com backoff 1–30s, uma conexão por cliente, reset após 30s estáveis; três handshakes consecutivos sem abrir encerram a tentativa automática e oferecem ação real de reconectar/novo login. Browser não expõe HTTP 401 do handshake: não se presume motivo de autenticação a partir de falha de rede. Expiração é tratada por expiresAt/evento real/fechamento 1008.
+- Watchdog do cliente de 12s evita estado Enviando indefinido se a resposta se perder entre Web API e navegador. Não substitui timeout interbackend de 5s e não reenvia mensagens. Estados conhecidos de rejeição recuperam rascunho se o usuário ainda não digitou outro texto; resultado incerto não gera tentativa automática.
+- Botão Enviar permanece acionável para texto válido durante indisponibilidade, permitindo o feedback exigido ao tentar enviar. O transporte bloqueia o envio real sem canal e mantém rascunho; vazio/excesso de tamanho desabilitam o botão. Essa interpretação mantém o requisito oficial de aviso na tentativa.
+- CSS próprio com tokens aprovados, fontes do sistema, SVG simples para marca/ícones, sem fontes remotas ou biblioteca visual. Nome do usuário permanece visível em telas estreitas. UI_UX.md original preservado.
+- Browser integrado sem navegador disponível (lista vazia). QA via Playwright/Edge instalado, contexto isolado, sem alterar configurações globais ou acessar perfil pessoal. W01 apenas atrasa resposta real para observar loading; W07/W08 interceptam eventos reais para injetar falhas, não substituem a integração das APIs.
+- ESLint 10 com plugins diretos compatíveis (Next, React Hooks e TypeScript); config agregado do Next trouxe plugins com peer limitado a ESLint 9 e foi removido. Instalação pelo lockfile e lint verificados. Alertas transitivos de picomatch em ferramentas de desenvolvimento permanecem documentados; produção sem alertas na consulta.
+
 ## Concretizadas no Gate 1
 
 - SDK oficial Microsoft 10.0.404 instalado com autorização, assinatura e SHA512 verificados; SDK 9.0.301 preservado. global.json local fixa SDK estável. Pacote JwtBearer 10.0.15 e lockfiles NuGet; harness usa ws 8.23.0 com lockfile npm.
