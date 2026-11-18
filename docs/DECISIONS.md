@@ -1,5 +1,19 @@
 # Decisões — 17/11/2026
 
+## Gate 3 — Android nativo
+
+- Template oficial expo-template-blank-typescript 58.0.35, obtido pelo npm pack para preservar o .env.example preexistente. Expo 58.0.26, React Native 0.88.1 e React 19.3.0 em conjunto; dependências nativas escolhidas via expo install. Lockfile local; sem instalação global. Referências oficiais: [criação](https://docs.expo.dev/get-started/create-a-project/) e [Expo Go Android](https://expo.dev/go?device=true&platform=android&sdkVersion=58).
+- Expo Go oficial no Samsung SM-A055M/Android 15 autorizado. Não há necessidade funcional de development build: HTTP, WS, crypto e Safe Area são compatíveis. Exportação Hermes valida bundle, não produz APK independente. Nenhuma publicação EAS.
+- USB com adb reverse 5002 e 8081 permite Mobile API/Metro locais sem mudança de firewall. URL EXPO_PUBLIC_API_URL pública, padrão 127.0.0.1:5002; alternativa 10.0.2.2 documentada para emulador. Não redirecionar Web API para Android.
+- Componentes nativos separados em screens/components/theme; transporte e protocolo em services; hook de ciclo de vida em hooks. Conceitos do Web reutilizados em código local, sem componentes DOM nem dependência runtime do frontend Web.
+- A implementação Android do React Native gera Origin HTTP por padrão. Confirmado no WebSocketModule.kt instalado. Adaptador native-socket envia Origin vazio, aceito pela política nativa existente com JWT obrigatório. Não relaxar Origin da Web API nem mudar backend para acomodar o cliente.
+- UUID nativo via expo-crypto, injetado no transporte para teste sem ambiente nativo. Sessão/JWT somente em memória. Ao sair, o transporte elimina snapshot, token, listeners de socket e timers; hook remove listener AppState.
+- Em segundo plano, fechar socket, cancelar retry e converter pendências em resultado incerto. Preservar rascunho/conversa enquanto o processo existir; retorno verifica expiração e reconecta sem replay. Não prometer execução/recepção contínua em background.
+- ACK remote_received só confirma serviço remoto. Watchdog local 12s cobre ausência de resposta ao dispositivo; timeout interbackend continua 5s. Erro conhecido recupera texto se não houver outro rascunho; resposta tardia não sobrescreve estado terminal. Timestamp próprio não é inventado.
+- Safe Area nativa, KeyboardAvoidingView/resize, ScrollView para a lista efêmera da sessão, alvos de toque de pelo menos 48dp, fontes do sistema e paleta aprovada. FlatList inicialmente usado calculava scrollToEnd antes de estabilizar a altura de balões/status; simplificado para medir o conteúdo real. Trade-off: renderiza toda a conversa da sessão, sem otimização para histórico extenso (fora do MVP). Usuário/autor visíveis, textos quebram linha, envio vazio/excessivo bloqueado. Tentativa com canal indisponível produz aviso e preserva texto.
+- Testes físicos via ADB e navegador Edge isolado/Playwright, sem hooks de teste no aplicativo. Credenciais efêmeras por API. Cenário de ACK ausente usa peer WS controlado autenticado, identificado separadamente da prova Web ↔ Android por duas APIs reais.
+- Alertas npm são registrados separadamente por projeto/comando. Preservados os 12 altos do Web; Mobile também tem alertas transitivos Expo/Metro/codegen. Nenhum audit fix --force; avaliar compatibilidade e alcançabilidade no Gate 4, mantendo status PENDENTE.
+
 ## Gate 2 — frontend Web
 
 - Next.js App Router 16.4.6 e React 19.3.1, versões estáveis consultadas no registro npm e compatíveis com Node 24.18.0. Sem API routes/proxy de chat no Next: o navegador chama exclusivamente a Web API existente.

@@ -1,0 +1,28 @@
+{
+  "started": "2026-11-18T02:15:06.050Z",
+  "finished": "2026-11-18T02:21:30.056Z",
+  "device": {
+    "serial": "R9XX104V6HZ",
+    "model": "SM-A055M",
+    "android": "15"
+  },
+  "flows": [
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "c9138329-1b61-42d8-b889-eaba2e6e3b3b",
+      "content": "Ola Android! Mensagem enviada pelo navegador real."
+    },
+    {
+      "direction": "Android → browser",
+      "type": "chat.message",
+      "messageId": "5194158d-f739-448a-8f57-8c92f94393b2",
+      "roomId": "general",
+      "senderId": "mobile-demo",
+      "senderName": "Usuário Mobile",
+      "origin": "mobile",
+      "content": "Ola Web! Resposta enviada pelo Android fisico.",
+      "timestamp": "2026-11-18T02:16:19.3323231Z"
+    }
+  ]
+}

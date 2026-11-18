@@ -1,0 +1,7 @@
+{
+  "expo": {
+    "name": "TalkToMe", "slug": "talktome-mobile", "version": "0.1.0",
+    "orientation": "portrait", "userInterfaceStyle": "light",
+    "android": { "package": "com.talktome.mobile", "softwareKeyboardLayoutMode": "resize" }
+  }
+}

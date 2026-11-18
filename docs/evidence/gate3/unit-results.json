@@ -1,0 +1,18 @@
+{
+  "command": "npm run typecheck; npm test",
+  "typecheck": "passed",
+  "tests": 6,
+  "passed": 6,
+  "failed": 0,
+  "durationMs": 12525.5178,
+  "environment": "Node 24.18.0, Windows; controlled sockets, not Android UI",
+  "scenarios": [
+    "minimal payload, correlated ACK, visual deduplication",
+    "known rejection restores draft; lost connection is uncertain",
+    "background/foreground single socket and logout cleanup",
+    "empty/2000/2001 and invalid protocol",
+    "real 12s watchdog, no replay, late ACK ignored",
+    "session expiry before foreground reconnect"
+  ],
+  "recordedAt": "2026-11-18T02:10:19.327Z"
+}

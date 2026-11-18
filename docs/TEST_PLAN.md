@@ -1,5 +1,55 @@
 # Plano de testes
 
+## Gate 3 — Android físico e transporte Mobile
+
+**Execução final aprovada: 10/10 cenários físicos e 6/6 testes do transporte.** Android: 17/11/2026, 23:15:06–23:21:30 (São Paulo). Corrigidos handshake Origin e rolagem antes da aprovação. Build/exportação, TypeScript e Expo Doctor aprovados; não houve geração de APK próprio.
+
+Projeto apps/mobile: `npm ci`, `npm run typecheck`, `npm test`, `npx expo-doctor`, `npm run export`; auditorias completa e omit=dev separadas. `export` compila bundle Android/Hermes, não APK. Testes unitários do transporte usam sockets controlados; prova ponta a ponta usa aplicativo React Native real no Expo Go e navegador Next.js real.
+
+`npm run test:android` requer SDK/ADB, um Android USB autorizado (ANDROID_SERIAL quando necessário), Expo Go compatível, Metro em localhost:8081, Edge instalado e dependências Web/tests/integration. Antes: builds de ambas APIs e Web; portas 3000/5001/5002 livres. Harness cria contas/chaves efêmeras nos processos, sem alterar .env. Usa adb reverse 5002/8081 e interage com a UI por ADB. Manter aparelho desbloqueado e reservado; não usar simultaneamente outro dump/UI automation. Para uma execução estável do teste, iniciar Metro com `$env:CI='1'; npm run android` em terminal separado; CI é variável apenas desse processo, desabilitando Fast Refresh.
+
+| ID | Cenário físico automatizado | Evidência/critério |
+|---|---|---|
+| M01 | Campos vazios, credenciais inválidas | Mensagens na tela; API real, sem acesso ao chat |
+| M02 | Login mobile válido | Usuário Mobile, socket autenticado e canal remoto conectado |
+| M03 | Navegador → Android e retorno | Duas APIs reais, autores, IDs e ACK; browser não chama porta 5002; screenshots de ambos |
+| M04 | Vazio e 2000/2001 | Envio vazio/excessivo desabilitado; 2000 habilitado; digitação ADB em blocos |
+| M05 | Parar/reiniciar Web API | Aviso na tentativa, rascunho preservado, nova mensagem chega ao browser |
+| M06 | Parar/reiniciar Mobile API | Desconexão do app, preservação do rascunho e nova mensagem após retorno |
+| M07 | Home/retorno ao app | Rascunho preservado; socket restabelecido sem replay |
+| M08 | Logout e expiração real | Campos/sessão limpos; JWT de 15s emitido pela Mobile API expira e retorna ao login |
+| M09 | Suprimir ACK com peer de teste autenticado | Mobile API real retorna resultado incerto; um envio; ACK tardio não vira sucesso |
+| M10 | Multilinha, textos longos e scroll | Mensagens reais pelo Web; leitura anterior não é forçada ao fim |
+
+Consultar [resultado de cada cenário e data](evidence/gate3/android-results.json); cenários ausentes ou com failed não são aprovados. M09 usa peer controlado no lugar da Web API apenas para injetar perda de ACK; a prova entre os dois backends reais é M03. Após falhas prolongadas de handshake, harness usa Reconectar quando oferecido — não confundir isso com reconexão automática ilimitada.
+
+Seis testes unitários adicionais: payload mínimo/ACK/deduplicação; rejeição/rascunho/perda incerta; AppState/um socket/logout; limites/JSON inválido; watchdog real de 12s/ACK tardio/sem replay; expiração antes de reconectar. São testes do código TypeScript Mobile em Node, não testes de UI física.
+
+Validação visual: screenshots reais login/chat, teclado aberto, falha remota e expiração. Safe Area e compositor conferidos no Samsung SM-A055M (720×1600, Android 15). Não substituir essa evidência por viewport de navegador. NÃO EXECUTADOS: emulador, iOS, outro tamanho de aparelho, rotação (app restrito a retrato), TalkBack manual, rede celular/Wi-Fi real degradada, APK independente assinado, execução prolongada em background e carga prolongada. Validação humana de conforto de digitação/leitura permanece recomendada; automação por ADB não equivale a avaliação subjetiva manual.
+
+Auditoria: preservar registro dos 12 alertas altos do Web e analisar separadamente Mobile. Gate 4 deve reconsultar advisories, atualizações compatíveis e impacto nos builds/testes. Não aplicar audit fix --force neste gate.
+
+## Gate 2 — navegador real
+
+Comandos em apps/web: `npm ci --no-audit`, `npm run typecheck`, `npm run lint`, `npm run build`, `npm test`. Playwright inicia Next em produção, dois backends reais e cliente WS mobile de teste. Microsoft Edge headless em contexto isolado; Node 24.18.0, Windows x64. Evidências em [resultados](evidence/gate2/results.json) e [IDs dos fluxos](evidence/gate2/flows.json).
+
+| ID | Verificação | Cobertura |
+|---|---|---|
+| W01 | Login obrigatório, inválido, carregamento, sucesso e estado vazio | API real; atraso controlado da resposta real para observar loading; um único POST |
+| W02 | Web ↔ cliente mobile por ambas APIs, autor e ACK; vazio, 2000/2001, Shift+Enter, HTML textual seguro | Sem acesso do navegador à Mobile API; nenhum erro JS de página no cenário |
+| W03 | Mobile API indisponível e retorno | Estado local conectado separado do remoto; tentativa mostra erro, rascunho preservado, envio após reconexão |
+| W04 | Queda/retorno Web API e logout | Reconexão automática; rascunho mantido; logout sem novos sockets; reload volta ao login |
+| W05 | Responsividade e rolagem | 320/375/768/1280 px, desktop 1440; sem overflow horizontal; compositor acessível; texto longo; leitura anterior não é deslocada; usuário visível |
+| W06 | Sessão de 3s emitida pela API | Expira, encerra chat, exibe aviso e pede novo login; senha vazia |
+| W07 | ACK perdido no retorno ao navegador | Mensagem chegou ao cliente real; resposta real é suprimida; estado incerto em 12s, um único envio, ACK tardio ignorado |
+| W08 | Rejeição real com estado remoto desatualizado | Status de conexão é retido pelo teste; API retorna erro real, UI mostra falha conhecida e recupera texto |
+
+As capturas em evidence/gate2 foram produzidas pelos testes e inspecionadas visualmente. Duas falhas iniciais eram seletores ambíguos para role=alert (anunciador do Next), e uma para texto exato do usuário com rótulo aninhado; corrigidas nos testes. Falha de lint no helper (catch vazio) corrigida com descrição do caso esperado.
+
+Backends/contrato/scripts do Gate 1 não foram alterados; não houve necessidade de repetir sua matriz completa. O Gate 2 exercita os dois processos reais novamente. NÃO EXECUTADOS: Expo, dispositivo físico, Firefox/Safari, leitor de tela real, teclado virtual móvel e carga prolongada. A responsividade testada é viewport de navegador desktop, não aplicativo nativo.
+
+O resumo e o resultado final de cada execução são gravados em results.json; consultar PROGRESS para a última execução validada.
+
 **Gate 1 executado: 18 grupos de integração aprovados e quatro verificações de transporte aprovadas.** Resultados detalhados abaixo e em [evidências](evidence/gate1-results.json). A matriz descreve também testes manuais futuros, que não foram executados. Harness HTTP/WS inicia dois processos com configurações efêmeras, sem depender dos frontends. Manual web no Gate 2, mobile e ponta a ponta no Gate 3, regressão no Gate 4.
 
 | ID | Tipo / gate | Procedimento | Resultado esperado |
