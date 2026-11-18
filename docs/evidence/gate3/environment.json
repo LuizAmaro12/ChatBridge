@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-11-18T02:04:53.524Z",
+  "node": "v24.18.0",
+  "platform": "win32",
+  "device": {
+    "model": "SM-A055M",
+    "android": "15",
+    "display": "720x1600",
+    "transport": "USB / adb reverse 5002 and 8081"
+  },
+  "stack": {
+    "expo": "58.0.26",
+    "expo-crypto": "58.0.8",
+    "expo-status-bar": "58.0.5",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "5.11.1"
+  },
+  "expoDoctor": {
+    "checks": 20,
+    "passed": 20
+  },
+  "audits": {
+    "info": 0,
+    "low": 0,
+    "moderate": 2,
+    "high": 26,
+    "critical": 0,
+    "total": 28
+  },
+  "notes": [
+    "No AVD listed",
+    "Expo Go installed by official Expo CLI",
+    "No firewall changes",
+    "Web API and backend code preserved"
+  ]
+}

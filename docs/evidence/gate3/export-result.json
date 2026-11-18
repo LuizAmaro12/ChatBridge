@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-11-18T02:17:25.523Z",
+  "command": "npm run export",
+  "exitCode": 0,
+  "typecheck": "passed",
+  "platform": "android",
+  "artifact": "Hermes bundle (not a standalone APK)",
+  "metadata": {
+    "version": 0,
+    "bundler": "metro",
+    "fileMetadata": {
+      "android": {
+        "bundle": "_expo/static/js/android/index-326a59d0875609b7788ece859e2d70f0.hbc",
+        "assets": []
+      }
+    }
+  }
+}

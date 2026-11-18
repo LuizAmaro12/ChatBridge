@@ -1,0 +1,30 @@
+{
+  "name": "talktome-mobile",
+  "description": "Cliente Android nativo do TalkToMe",
+  "license": "0BSD",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "dependencies": {
+    "expo": "~58.0.26",
+    "expo-crypto": "~58.0.8",
+    "expo-status-bar": "~58.0.5",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "~19.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start --localhost --port 8081",
+    "android": "expo start --localhost --android --port 8081",
+    "typecheck": "tsc --noEmit",
+    "export": "expo export --platform android",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:android": "node tests/android-e2e.mjs"
+  },
+  "private": true
+}
