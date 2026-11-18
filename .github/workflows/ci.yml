@@ -1,0 +1,185 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  CI: 'true'
+  NEXT_TELEMETRY_DISABLED: '1'
+  EXPO_NO_TELEMETRY: '1'
+  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+
+jobs:
+  backends:
+    name: Backends — build e integração
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tests/integration/package-lock.json
+      - name: Restore Web API (lockfile)
+        run: dotnet restore services/web-api/ChatBridge.Api.csproj --locked-mode
+      - name: Restore Mobile API (lockfile)
+        run: dotnet restore services/mobile-api/ChatBridge.Api.csproj --locked-mode
+      # Harnesses load bin/Debug/net10.0 explicitly: keep Debug builds.
+      - name: Build Web API
+        run: dotnet build services/web-api/ChatBridge.Api.csproj --no-restore --nologo
+      - name: Build Mobile API
+        run: dotnet build services/mobile-api/ChatBridge.Api.csproj --no-restore --nologo
+      - name: Transporte .NET
+        run: dotnet run --project tests/transport/TransportChecks.csproj
+      - name: Instalar harness
+        run: npm ci --prefix tests/integration --no-audit
+      - name: Regressão do ciclo de vida WebSocket
+        run: node --test tests/integration/lifecycle.test.mjs
+      - name: Integração com duas APIs reais
+        run: node tests/integration/run.mjs
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/ci-backends
+      - name: Evidências backend (inclusive falhas)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-backends
+          path: ${{ runner.temp }}/ci-backends/
+          retention-days: 7
+          if-no-files-found: warn
+
+  web:
+    name: Web — build e Playwright W01–W08
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Instalar Web
+        run: npm ci --no-audit
+        working-directory: apps/web
+      - name: TypeScript
+        run: npm run typecheck
+        working-directory: apps/web
+      - name: Lint
+        run: npm run lint
+        working-directory: apps/web
+      - name: Build de produção
+        run: npm run build
+        working-directory: apps/web
+      - name: Preparar Web API
+        run: dotnet build services/web-api/ChatBridge.Api.csproj --nologo -p:RestoreLockedMode=true
+      - name: Preparar Mobile API
+        run: dotnet build services/mobile-api/ChatBridge.Api.csproj --nologo -p:RestoreLockedMode=true
+      - name: Garantir Microsoft Edge
+        run: npx --no-install playwright install msedge
+        working-directory: apps/web
+      - name: Playwright (um worker, APIs próprias, portas 3000/5001/5002)
+        run: npm test
+        working-directory: apps/web
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/ci-web
+      - name: Evidências Web (inclusive falhas)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-web
+          path: |
+            ${{ runner.temp }}/ci-web/
+            apps/web/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  mobile:
+    name: Mobile — checks e bundle Android (sem APK)
+    runs-on: windows-2025
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+      - name: Instalar Mobile
+        run: npm ci --no-audit
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Testes de transporte Mobile
+        run: npm test
+      - name: Expo Doctor
+        run: npx --yes expo-doctor@1.21.8
+      - name: Exportar Android/Hermes
+        run: npm run export
+      - name: Metadados da exportação
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-mobile-export-metadata
+          path: apps/mobile/dist/metadata.json
+          retention-days: 7
+          if-no-files-found: warn
+
+  audit:
+    name: Auditoria informativa — não atesta segurança
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      # npm audit uses lockfiles; installing/executing dependencies is unnecessary.
+      - name: Validar classificação dos resultados de auditoria
+        run: node --test scripts/ci/audit.test.mjs
+      - name: Coletar quatro auditorias e registrar riscos/exit codes
+        run: node scripts/ci/audit.mjs
+        env:
+          AUDIT_OUTPUT_DIR: ${{ runner.temp }}/ci-audit
+      - name: Relatórios de auditoria (inclusive falhas de coleta)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-audit-informational
+          path: ${{ runner.temp }}/ci-audit/
+          retention-days: 7
+          if-no-files-found: error

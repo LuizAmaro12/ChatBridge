@@ -161,7 +161,37 @@ Para o último comando, mantenha Android desbloqueado/autorizado e Metro do **Ta
 
 Relatórios e ressalvas da rodada do Gate 4: [PROGRESS](docs/PROGRESS.md), [checks](docs/evidence/gate4/checks.json) e [segurança](docs/evidence/gate4/security-analysis.md). Testes via Edge/ADB são automatizados; não equivalem a uma avaliação manual humana.
 
-## Documentação
+## Integração contínua (GitHub Actions)
+
+Workflow [CI](.github/workflows/ci.yml): PRs destinados à main, pushes na main e execução manual (`workflow_dispatch`). Quatro jobs isolados em Windows Server 2025, Node 24 e .NET conforme global.json:
+
+| Job | Verificações |
+|---|---|
+| Backends | Restore com lockfiles, builds Debug das duas APIs, quatro checks de transporte e integração entre APIs reais |
+| Web | npm ci, typecheck, lint, build de produção, Edge e oito cenários Playwright W01–W08 |
+| Mobile | npm ci, typecheck, seis testes, Expo Doctor 1.21.8 e exportação Android/Hermes; não gera APK |
+| Auditoria informativa | npm audit completo e omit=dev separados para Web/Mobile; JSON, contagens, códigos de saída, avisos e resumo |
+
+Falha de build/teste faz o respectivo job falhar; passos dependentes ficam não executados. Vulnerabilidades npm são informativas inicialmente: o job verde significa **coleta concluída**, não aprovação de segurança. Erro de consulta, timeout ou JSON inválido faz o job de auditoria falhar. Baseline histórico: Web 12 altos/produção 0; Mobile 27 (25 altos/2 moderados). Nenhum alerta é subtraído ou tratado como corrigido. Consultas podem mudar com o registro; a análise histórica permanece em [segurança Gate 4](docs/evidence/gate4/security-analysis.md). Bloqueio por novos advisories/aumento de severidade fica para uma política futura.
+
+Relatórios ficam nos artifacts `ci-backends`, `ci-web`, `ci-mobile-export-metadata` e `ci-audit-informational`, retidos por sete dias. `EVIDENCE_DIR` aponta ao diretório temporário do runner; arquivos históricos não são sobrescritos. Logs de cada comando ficam nos passos da execução. Upload é tentado mesmo após falha; se o processo não chegou a gerar relatório, o log informa ausência. Não são enviados .env, node_modules, traces de autenticação ou bundle completo.
+
+Não são necessários secrets pessoais: os testes criam credenciais efêmeras. Permissão do workflow limitada a leitura do conteúdo, sem credencial Git persistida. Cache npm usa cada lockfile; não há cache de node_modules nem cache NuGet adicional. PR atualizado cancela sua execução anterior. Jobs têm timeouts e máquinas independentes, portanto não disputam portas.
+
+**CI não implementa CD/deploy.** Android físico/ADB/Expo Go e validação manual permanecem locais e independentes; `test:android` não executa no runner comum.
+
+Após publicar a branch com autorização, abra PR para main e acompanhe a aba **Actions → CI** ou os checks do PR. Inspecione os quatro jobs, o resumo de auditoria e os artifacts, inclusive em falhas. O disparo manual estará disponível quando o workflow existir na branch padrão. Não há badge de sucesso antecipado: validação local não equivale à execução real no GitHub.
+
+Para conferir apenas o coletor localmente, sem alterar evidências históricas:
+
+```powershell
+node --test scripts/ci/audit.test.mjs
+$env:AUDIT_OUTPUT_DIR = Join-Path $env:TEMP 'talktome-audit-local'
+node scripts/ci/audit.mjs
+Remove-Item Env:AUDIT_OUTPUT_DIR
+```
+
+## Referências do projeto
 
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Contrato v1](docs/MESSAGE_CONTRACT.md)

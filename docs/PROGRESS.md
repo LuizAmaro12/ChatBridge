@@ -1,5 +1,88 @@
 # Progresso — ChatBridge
 
+## CI — correção de encerramento WebSocket e evidências (18/11/2026)
+
+**Correção validada localmente; nova execução no GitHub Actions PENDENTE de publicação.** Branch `chore/ci-github-actions`, inicialmente limpa. Nenhum commit, push ou merge realizado. Regras de negócio, autenticação, protocolo, limites e asserções existentes preservados.
+
+Incidente informado no PR #6, run `44411217128`, job `135179543269`: builds/transporte aprovados, integração até `PASS T17 pending limit`, seguida de dois erros `read ECONNRESET`, sendo o segundo uma rejeição não tratada (Node 24.22.3). A consulta pública ao job retornou 404 e não havia GitHub CLI autenticado; a análise usa o log fornecido pelo responsável. O upload no runner não foi inspecionado diretamente.
+
+### Diagnóstico e correção
+
+- Uma execução original completa passou, confirmando a intermitência. Em cópia temporária com repetição do teste de conexão excedente, a segunda tentativa retornou **1006 em vez de 1008**: [evidência anterior](evidence/ci-websocket-fix/before-close-race.json). As duas APIs enviavam apenas `CloseOutputAsync` e imediatamente executavam `Abort` no descarte. Agora, exclusivamente na rejeição por limite de clientes (onde não existe leitor concorrente), aguardam `WebSocket.CloseAsync`, limitado a dois segundos e cancelável. O limite e o código 1008 permanecem iguais.
+- O harness criava `once(socket, 'close')` antes de aguardar `open()`, mas só observava a primeira Promise depois da abertura. Um erro rejeita ambas; a Promise de fechamento ficava sem tratamento. O teste com reset TCP real reproduziu a rejeição não tratada usando a sequência antiga. `lifecycle.mjs` agora observa ambas imediatamente com `Promise.all`, propagando o erro ao teste. Não há filtro global de ECONNRESET nem de rejeições. Referência: [Node events.once](https://nodejs.org/api/events.html#eventsonceemitter-name-options).
+- `run.mjs` grava checkpoints após cada grupo, com estado RUNNING enquanto incompleto, e registra falhas antes da limpeza. O resultado final distingue PASS/FAIL e erros de execução/limpeza. Uma falha ao parar um processo não impede a tentativa de parar o outro. A verificação de segredos nos logs continua obrigatória. Interrupções abruptas podem deixar somente o último checkpoint, sem logs finais; não são sucesso.
+- Todos os testes e asserções anteriores foram mantidos; o T17 passou a exigir 20 rejeições consecutivas **por API**, todas com código 1008. A CI executa três regressões do harness antes da integração: reset TCP, fechamento imediato 1008 e falha de inicialização com saída 1/evidência FAIL. O upload existente mantém `if: always()`; nenhum `continue-on-error` foi adicionado.
+
+### Validações executadas
+
+Windows local, SDK .NET 10.0.404, Node instalado 24.18.0 e Node oficial portátil 24.22.3 baixado para TEMP com SHA-256 conferido contra SHASUMS256.txt; nenhuma instalação global alterada.
+
+| Comando/cenário | Resultado real |
+|---|---|
+| `dotnet build services/web-api/ChatBridge.Api.csproj --no-restore --nologo` | PASS, zero avisos/erros |
+| `dotnet build services/mobile-api/ChatBridge.Api.csproj --no-restore --nologo` | PASS, zero avisos/erros |
+| `dotnet run --project tests/transport/TransportChecks.csproj` | 4 verificações PASS |
+| `node --test tests/integration/lifecycle.test.mjs` | 3 PASS em 24.18.0 e 24.22.3; reset continua rejeitando, falha de inicialização continua saindo com código 1 |
+| Sequência antiga de Promises em cópia temporária do teste de reset | FAIL esperado: ECONNRESET não tratado |
+| `node tests/integration/run.mjs`, EVIDENCE_DIR separado por execução | 3 rodadas consecutivas, 18 grupos PASS por rodada, Node 24.18.0 |
+| Cópia temporária do harness corrigido, apenas repetição aumentada de 20 para 200 por API | 18 grupos PASS, 400 fechamentos 1008, Node 24.22.3 |
+| actionlint 1.7.12, `node --check tests/integration/run.mjs`, `git diff --check` | PASS |
+
+Uma tentativa de executar as regressões em paralelo com a integração falhou por EADDRINUSE na porta 5001, ocupada pela própria integração. A repetição sequencial passou; o workflow já executa esses passos sequencialmente. Nenhuma asserção foi removida para contornar a falha.
+
+Evidências completas: [rodada 1](evidence/ci-websocket-fix/after-run-1.json), [rodada 2](evidence/ci-websocket-fix/after-run-2.json), [rodada 3](evidence/ci-websocket-fix/after-run-3.json) e [Node 24.22.3/stress](evidence/ci-websocket-fix/after-node24.22.3-stress.json). Todas incluem T04 Web → Mobile e T05 Mobile → Web com messageId, autoria e conteúdo observados. No total, 520 rejeições excedentes verificadas após a correção. Logs brutos permanecem no TEMP local; as evidências históricas não foram sobrescritas.
+
+**Limitação:** os dois defeitos foram reproduzidos localmente, mas a associação exata do reset original à corrida de fechamento no runner ainda depende da nova execução do PR. Windows hospedado e upload efetivo de artifacts NÃO RETESTADOS. Web/Mobile UI e testes físicos NÃO REEXECUTADOS nesta correção de transporte/harness. Próximo passo: revisar e publicar na mesma branch para validar os quatro jobs e o artifact `ci-backends` no GitHub.
+
+## CI — implementação e validação local (18/11/2026)
+
+**Workflow implementado e validado localmente; execução real no GitHub Actions NÃO EXECUTADA.** Depende de publicação autorizada para confirmação na aba Actions. Nenhum commit, push, merge, deploy ou CD realizado nesta etapa.
+
+Diagnóstico: Git inicialmente limpo, branch `chore/gate-4-validacao-estabilizacao`, HEAD `769431c9c429d1f3edbc3179d4a5e998a867b91e`; nenhum workflow existente. Avaliação/AGENTS lidos integralmente; documentação, segurança Gate 4, manifests/lockfiles, configurações e scripts consultados. Plano apresentado antes da implementação. Riscos principais: diferenças do Windows hospedado, downloads de ferramentas, disponibilidade do Edge e alertas npm.
+
+Criados `.github/workflows/ci.yml`, `scripts/ci/audit.mjs` e `scripts/ci/audit.test.mjs`; README, DECISIONS, TEST_PLAN e este registro atualizados. Evidências locais em `docs/evidence/ci/`. Nenhuma alteração em endpoints, autenticação, protocolo, telas, testes funcionais existentes, manifests/lockfiles ou .env.
+
+Quatro jobs isolados Windows Server 2025: backends (restore locked/build Debug/transporte/integração), Web (npm ci/typecheck/lint/build/Edge/W01–W08), Mobile (npm ci/typecheck/seis testes/Expo Doctor 1.21.8/export Android) e auditoria informativa. Gatilhos: PR para main, push main e workflow_dispatch. Permissões contents:read, credencial Git não persistida, Node 24, SDK de global.json, cache npm por lockfile, timeouts 15–25 minutos, cancelamento de execuções antigas do mesmo PR. Artifacts com retenção sete dias e EVIDENCE_DIR no TEMP do runner; sem sobrescrever histórico.
+
+### Validações reais desta implementação
+
+Executada cópia limpa por `git archive HEAD` em TEMP, sem .env, node_modules ou bin/obj existentes. Windows local, PowerShell 5.1, Node 24.18.0, npm 11.16.0, SDK 10.0.404 e Edge instalado. Isso não emula as actions de setup/cache/upload nem o PowerShell 7 do runner.
+
+| Verificação | Resultado |
+|---|---|
+| actionlint 1.7.12 | Exit 0 final; detectou inicialmente runner.temp em env de job, corrigido para env de passo |
+| npm ci nos três projetos | Exit 0; instalação por lockfiles em cópia limpa |
+| Restore --locked-mode das duas APIs | Exit 0 |
+| Dois builds --no-restore | Exit 0, zero avisos/erros |
+| Testes de transporte .NET | 4 aprovados |
+| Integração entre APIs reais | 18 grupos aprovados |
+| Web typecheck/lint/build | Exit 0 |
+| Playwright W01–W08 | 8 aprovados, 37,4s, APIs reais/Edge isolado |
+| Mobile typecheck/test | Exit 0; 6 testes aprovados |
+| Expo Doctor 1.21.8 | 20/20 checks |
+| Exportação Mobile | Exit 0; 621 módulos, bundle Android/Hermes, não APK |
+| Coletor de auditoria | 3 testes aprovados; quatro consultas reais também validadas sem node_modules |
+| Registro npm propositalmente indisponível | Exit 1 esperado; quatro collection_error registrados, sem falso zero |
+| git diff --check | Exit 0 |
+
+[Registro de comandos, ambiente e limitações](evidence/ci/validation.json), [backend](evidence/ci/local-backends.json), [Web](evidence/ci/local-web.json), [auditoria atual](evidence/ci/results.json) e [falha controlada de consulta](evidence/ci/audit-unavailable.json).
+
+Revisão final: actionlint e git diff --check aprovados; JSONs novos válidos, links locais sem ausências, 178 arquivos rastreados/novos comparados com os segredos locais conhecidos sem ocorrências. Diff confirmou produto, testes funcionais existentes, global.json, fontes de verdade e evidências históricas preservados. Essa checagem não equivale a varredura de histórico remoto ou garantia sobre segredos desconhecidos.
+
+O npm avisou sobre lifecycle script esbuild ainda não aprovado durante instalação Mobile; testes/export passaram sem alterar allowScripts global. Next informou ausência de cache de build, esperado na cópia limpa. Instalador Edge foi conferido com dry-run; não foi reinstalado no computador. A CI executará a preparação real do navegador no runner.
+
+### Auditoria: coleta informativa não é aprovação de segurança
+
+Baseline Gate 4 preservado: Web 12 altos/produção 0; Mobile 27 (25 altos/2 moderados) em ambas consultas. **A resposta atual do registro**, sem atualização de dependências, retornou Web 0/0 e Mobile **3 moderados** nos dois modos, com advisory minimatch GHSA-g3hv-75wg-m249. Picomatch não foi reportado nessa resposta atual. Não atribuir essa variação a correção aplicada nem substituir o histórico: nenhuma atualização foi realizada. Relatórios brutos separados em evidence/ci.
+
+Coletor preserva códigos npm e todas as severidades. Vulnerabilidades reportadas geram avisos e resumo, mas não falham a coleta. JSON inválido, timeout, falha de endpoint ou exit inconsistente fazem o job falhar. Não há continue-on-error genérico. A política inicial é informativa inclusive para novos alertas; comparação bloqueante de novos advisories/severidade é evolução futura, não implementada implicitamente.
+
+### Pendências e próximo passo
+
+NÃO EXECUTADOS: runner hospedado, download/cache das actions, upload/expiração de artifacts e instalador real Edge no runner. Android físico/manual não repetido nesta etapa e não configurado no runner comum. Gates anteriores continuam evidências independentes; o responsável relatou também validação manual, não executada pelo agente nesta etapa.
+
+Após autorização para publicar, abrir PR para main, conferir os quatro jobs/steps, resumo de auditoria e artifacts. Falhas funcionais devem deixar o job vermelho; passos dependentes pulados são não executados. workflow_dispatch torna-se disponível quando o arquivo existir na branch padrão. Sem alegação de CI verde antes dessa execução; nenhuma expansão de produto ou deploy autorizada.
+
 ## Gate 4 — resultado final (18/11/2026)
 
 **APROVADO COM RESSALVAS para avaliação local do MVP.** Regressão funcional aprovada; dependências npm ainda têm alertas conhecidos. Não é aprovação para produção nem declaração de segurança total. Nenhum commit, push, merge ou deploy realizado.

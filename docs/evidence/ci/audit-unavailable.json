@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-11-18T22:04:52.972Z",
+  "results": [
+    {
+      "project": "web",
+      "mode": "full",
+      "command": "npm audit --json",
+      "exitCode": 1,
+      "processError": null,
+      "status": "collection_error"
+    },
+    {
+      "project": "web",
+      "mode": "production",
+      "command": "npm audit --omit=dev --json",
+      "exitCode": 1,
+      "processError": null,
+      "status": "collection_error"
+    },
+    {
+      "project": "mobile",
+      "mode": "full",
+      "command": "npm audit --json",
+      "exitCode": 1,
+      "processError": null,
+      "status": "collection_error"
+    },
+    {
+      "project": "mobile",
+      "mode": "production",
+      "command": "npm audit --omit=dev --json",
+      "exitCode": 1,
+      "processError": null,
+      "status": "collection_error"
+    }
+  ]
+}

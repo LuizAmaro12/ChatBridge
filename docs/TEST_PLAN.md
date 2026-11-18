@@ -1,5 +1,15 @@
 # Plano de testes
 
+## CI — cobertura configurada
+
+`.github/workflows/ci.yml` configura builds/restores das APIs, quatro checks de transporte, 18 grupos de integração, Web typecheck/lint/build e W01–W08, Mobile typecheck/seis testes/Expo Doctor/export. Jobs backend/Web isolados e cenários sequenciais dentro deles. Dependências instaladas por npm ci; APIs por lockfiles NuGet. EVIDENCE_DIR temporário mantém histórico intacto.
+
+Auditoria: quatro consultas Web/Mobile (full/omit=dev), sem bloqueio por vulnerabilidade; coleta inválida falha. `node --test scripts/ci/audit.test.mjs` cobre alertas reais reportados, zero alertas, exit inconsistente, erro de endpoint, JSON inválido/nulo, timeout e contagens inválidas. Simulação local de registro indisponível deve retornar exit 1 e quatro estados collection_error, não uma aprovação vazia.
+
+Resultados hospedados devem ser conferidos nos passos/checks e artifacts da execução Actions; não deduzir aprovação da CI a partir do Gate 4. Critérios: falha de build/teste deixa job vermelho; resumo mostra contagens/exit codes npm; erro de infraestrutura é diferente de vulnerabilidade; passos pulados são NÃO EXECUTADOS. Limitações e execução local desta implementação estão em PROGRESS.
+
+**Fora do runner:** M01–M10 no Android físico, ADB/reverse, teclado/Safe Area/AppState no aparelho, conforto de uso e testes manuais humanos. Permanecem validações independentes documentadas nos Gates anteriores. Exportação não é APK, e CI não faz deploy.
+
 ## Gate 4 — regressão executada em 18/11/2026
 
 **Rodadas finais aprovadas:** 18 grupos de integração backend, quatro checks de transporte, oito cenários Web, seis testes Mobile e dez cenários no Android físico. Ambos builds .NET sem avisos/erros; Web typecheck/lint/build; Mobile typecheck/export e Expo Doctor 20/20. Não equivale a testes manuais humanos.

@@ -109,7 +109,13 @@ public static class Program
         var session = hub.Register(connection, lifetime.Token);
         if (session is null)
         {
-            await connection.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Client limit", CancellationToken.None);
+            // No reader was started for a rejected session. Complete the close handshake
+            // before Dispose aborts the socket, otherwise the client may see 1006/reset.
+            using var closeTimeout = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+            closeTimeout.CancelAfter(TimeSpan.FromSeconds(2));
+            try { await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Client limit", closeTimeout.Token); }
+            catch (Exception ex) when (ex is WebSocketException or OperationCanceledException)
+            { logger.LogDebug("Rejected client close interrupted: {Reason}", ex.GetType().Name); }
             return;
         }
         var writer = session.RunWriterAsync();
