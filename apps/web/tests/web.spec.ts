@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { credentials, start, stop, stopAll, connected, mobileClient, assertServicesFree } from './services';
 
-const evidence = path.resolve('../../docs/evidence/gate2');
+const evidence = path.resolve(process.env.EVIDENCE_DIR || '../../docs/evidence/gate2');
 const flows: object[] = [];
 async function enter(page: Page) {
   await page.goto('/');

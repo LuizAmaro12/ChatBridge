@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-18",
+  "timezone": "America/Sao_Paulo",
+  "note": "Resumo das saídas observadas; integração/browser/Android possuem relatórios próprios. Não é validação manual humana.",
+  "checks": [
+    {
+      "command": "dotnet build services/web-api/ChatBridge.Api.csproj --nologo",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0
+    },
+    {
+      "command": "dotnet build services/mobile-api/ChatBridge.Api.csproj --nologo",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0
+    },
+    {
+      "command": "dotnet run --project tests/transport/TransportChecks.csproj",
+      "exitCode": 0,
+      "passed": 4,
+      "coverage": "writer serializado, timeout 2s, fila limitada e cancelamento"
+    },
+    {
+      "directory": "apps/web",
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "directory": "apps/web",
+      "command": "npm run lint",
+      "exitCode": 0,
+      "note": "Repetido após importar node:process no reporter alterado; primeira execução teve no-undef nesse arquivo."
+    },
+    {
+      "directory": "apps/web",
+      "command": "npm run build",
+      "exitCode": 0,
+      "next": "16.4.6"
+    },
+    {
+      "directory": "apps/mobile",
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "directory": "apps/mobile",
+      "command": "npm test",
+      "exitCode": 0,
+      "passed": 6,
+      "failed": 0,
+      "durationMs": 12535.3389
+    },
+    {
+      "directory": "apps/mobile",
+      "command": "npm run export",
+      "exitCode": 0,
+      "modules": 621,
+      "artifact": "dist/_expo/static/js/android/index-326a59d0875609b7788ece859e2d70f0.hbc",
+      "note": "Bundle Hermes, não APK."
+    },
+    {
+      "directory": "apps/mobile",
+      "command": "npx expo-doctor",
+      "exitCode": 0,
+      "passed": 20,
+      "failed": 0
+    },
+    {
+      "command": "npm ls --all --json --prefix apps/web",
+      "exitCode": 0
+    },
+    {
+      "command": "npm ls --all --json --prefix apps/mobile",
+      "exitCode": 0
+    },
+    {
+      "command": "npm ls --all --json --prefix tests/integration",
+      "exitCode": 0
+    },
+    {
+      "command": "dotnet list services/{web,mobile}-api/ChatBridge.Api.csproj package --vulnerable --include-transitive --format json",
+      "exitCode": 0,
+      "note": "Duas consultas independentes, nenhum pacote vulner?vel listado."
+    }
+  ],
+  "environmentFailures": [
+    "npm audit no sandbox falhou por rede/cache; repetido fora dele e relatórios gravados.",
+    "Builds .NET no sandbox: acesso negado ao NuGet.Config; ambos repetidos fora dele e aprovados.",
+    "Integração backend inicial: APIs impedidas de iniciar pelo acesso ao EventLog Windows; evidência em backend/. Repetição fora do sandbox em backend-final/ passou.",
+    "Web inicial: APIs não iniciaram no sandbox e limpeza Playwright ficou bloqueada; encerrados apenas processos identificados da própria execução. Repetição fora do sandbox em web-final/ passou.",
+    "ADB inicialmente vazio; aparelho reconhecido após reconexão pelo responsável.",
+    "Primeira partida Metro: porta 8081 ocupada pelo projeto Dope; responsável encerrou seu Metro antes de iniciar TalkToMe. Nenhum processo alheio encerrado pelo agente.",
+    "Ap?s dez cen?rios Android aprovados, ADB deixou de responder inclusive devices; reverse cleanup n?o confirmado. Aplica??es encerradas e portas 3000/5001/5002/8081 sem escuta. Ver cleanup.json."
+  ]
+}

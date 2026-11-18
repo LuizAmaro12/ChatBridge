@@ -1,0 +1,263 @@
+mobile: info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5002
+
+mobile: info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+
+mobile: info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\PESSOAL\WEB-MOBILE\TalkToMe
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5001
+
+web: info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\PESSOAL\WEB-MOBILE\TalkToMe
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 898516df-ff17-475a-ab86-66d6b37fca2e from web
+
+web: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 85717876-1e42-4501-891a-8773a46212e0 from mobile
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted c52074e7-6df3-47d8-8664-2b1e36af4cfe from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 1dcb0dd7-4a7a-42b4-a4fb-b20912e0689b from web
+
+web: info: ChatBridge.PeerTransport[0]
+      Peer disconnected: WebSocketException
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+mobile: info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5002
+
+mobile: info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+
+mobile: info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\PESSOAL\WEB-MOBILE\TalkToMe
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted db086722-ba37-478f-bc23-f22a0394a5e2 from web
+
+web: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 9b7fb485-1f01-412c-ae52-b1a22286b0d0 from mobile
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Peer disconnected: OperationCanceledException
+info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5001
+
+web: info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\PESSOAL\WEB-MOBILE\TalkToMe
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+web: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 67b9bad6-aca2-4e25-b707-c405fb9ce96f from mobile
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 82bac918-6586-4689-bf2a-93adcb91588c from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted a45a8b7d-d560-4a76-8a8f-f5d4cca19d17 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted b783645d-0e80-4d4c-8157-5ea82d215561 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 462c0032-c970-4056-8fee-3b85f41642ff from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 2fad21e1-337e-480b-8229-63a4d36ec5e3 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 157622c1-e9df-4340-9db8-09d13a1ac663 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 5522b2a0-0a1f-4a5e-96bb-c63530fb39a4 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted ed2d6b97-89ba-4862-9eeb-76d6f62d6fa6 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 63dbbc0c-0b37-4d91-b97d-264801d34896 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted c68f181f-acf4-4042-b2c8-4d5fc290e634 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 67b6e5cd-4fcb-43e1-ade2-d0c2b0c3f402 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 2bc7a386-f817-4b6d-ad91-2fbb98964edc from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted c19e5d80-3a94-4508-bf1d-b7001694dcd3 from web
+
+web: info: ChatBridge.PeerTransport[0]
+      Remote message accepted ab879a9e-f200-4a6d-81c2-b905889c9bb2 from mobile
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 3ace02d3-8398-4908-a833-d694141677a6 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Peer disconnected: WebSocketException
+info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5001
+
+web: info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\PESSOAL\WEB-MOBILE\TalkToMe
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+web: info: ChatBridge.PeerTransport[0]
+      Remote message accepted de50e6c6-e34f-4cdd-94a6-72f7d0c8fc08 from mobile
+
+web: info: ChatBridge.PeerTransport[0]
+      Peer disconnected: WebSocketException
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+web: warn: ChatBridge.PeerTransport[0]
+      Peer heartbeat timed out
+
+web: info: ChatBridge.PeerTransport[0]
+      Peer disconnected: TaskCanceledException
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+web: info: ChatBridge.PeerTransport[0]
+      Peer disconnected: WebSocketException
+info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+mobile: info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5002
+
+mobile: info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+
+mobile: info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\PESSOAL\WEB-MOBILE\TalkToMe
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connecting
+
+web: info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5001
+
+web: info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\PESSOAL\WEB-MOBILE\TalkToMe
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+web: info: ChatBridge.PeerTransport[0]
+      Interbackend connected
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 3fb73fed-beef-4af8-a60f-2e120d2e677e from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted dba32093-b17c-4f8c-a427-98d161783d85 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Remote message accepted 7c7fcc71-4b0f-4918-9fd2-0d7d84fc1c68 from web
+
+mobile: info: ChatBridge.PeerTransport[0]
+      Peer disconnected: OperationCanceledException
+info: ChatBridge.PeerTransport[0]
+      Interbackend disconnected

@@ -8,7 +8,7 @@ import path from 'node:path';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const evidence = path.join(root, 'docs/evidence');
+const evidence = process.env.EVIDENCE_DIR ? path.resolve(process.env.EVIDENCE_DIR) : path.join(root, 'docs/evidence');
 const serviceKey = randomBytes(32).toString('hex');
 const roles = ['web', 'mobile'];
 const configs = Object.fromEntries(roles.map((role, i) => [role, {

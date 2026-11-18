@@ -2,7 +2,7 @@
 
 MVP de chat entre Next.js/TypeScript e React Native/Expo, cada cliente ligado exclusivamente à sua API ASP.NET Core. As duas APIs trocam mensagens por WebSocket full-duplex.
 
-**Estado: Gate 3 — APIs, frontend Web e aplicativo React Native/Expo implementados; validações e limitações em [PROGRESS](docs/PROGRESS.md).** Fontes de verdade: [Avaliacao.MD](Avaliacao.MD) e [AGENTS.md](AGENTS.md), preservadas. Prazo: 19/11/2026, quinta-feira, 13h (America/Sao_Paulo).
+**Estado: Gate 4 — regressão aprovada com ressalvas de dependências; Web ↔ Android físico validado nos dois sentidos. Resultados e limitações em [PROGRESS](docs/PROGRESS.md).** Fontes de verdade: [Avaliacao.MD](Avaliacao.MD) e [AGENTS.md](AGENTS.md), preservadas. Prazo: 19/11/2026, quinta-feira, 13h (America/Sao_Paulo).
 
 ## Estrutura
 
@@ -80,6 +80,8 @@ Para testar, pare as APIs e o servidor Next manuais, compile ambas APIs pelos co
 
 Auditoria final: zero alertas em dependências de produção; 12 alertas altos transitivos na cadeia de lint (`picomatch`), sem versão estável corrigida encontrada na consulta. Não foi aplicada atualização forçada. Detalhes em [auditoria](docs/evidence/gate2/dependency-audit.json).
 
+Reavaliação Gate 4: os 12 alertas Web permanecem; Mobile reportou 27 (25 altos/2 moderados), sem mudança de pacotes nem resolução dos dois advisories. Veja a [análise atual por vulnerabilidade, compatibilidade e alcance](docs/evidence/gate4/security-analysis.md). As contagens históricas abaixo são preservadas como evidência da época.
+
 ## Aplicativo Android (Gate 3)
 
 Em um quarto terminal, com as duas APIs e o Web em execução, conecte o Android por USB e autorize a depuração. No PowerShell, a partir da raiz:
@@ -135,6 +137,30 @@ Os `.env.example` registram nomes de configurações sem segredos. Next/Expo pod
 
 No dispositivo físico, preferir USB/reverse: dispensa IP LAN e alteração de firewall. Os backends mantêm suas configurações locais aprovadas; testes usam localhost. CORS HTTP da Web API autoriza somente `http://localhost:3000`; Origin é validado separadamente no WebSocket. O cliente nativo usa Origin vazio e JWT, comportamento já previsto pela Mobile API.
 
+O exemplo e a configuração local existente da Mobile API usam **0.0.0.0:5002**, escutando interfaces IPv4; USB não garante isolamento de rede. Para uso exclusivamente local/USB, pode-se definir `ASPNETCORE_URLS=http://localhost:5002` no `.env` da Mobile API. Não abrir firewall nem expor os serviços HTTP/WS publicamente.
+
+## Regressão e evidências do Gate 4
+
+Os harnesses aceitam `EVIDENCE_DIR` opcional, sem alterar os cenários. Use caminhos absolutos e uma pasta nova por execução para preservar evidências anteriores. Sem essa variável, os destinos históricos dos Gates 1–3 continuam sendo usados.
+
+Após os builds e checks acima, com portas 3000/5001/5002 livres, execute na raiz, sequencialmente:
+
+```powershell
+$evidenceRoot = Join-Path (Get-Location) 'docs/evidence/minha-regressao'
+$env:EVIDENCE_DIR = Join-Path $evidenceRoot 'backend'
+node tests/integration/run.mjs
+dotnet run --project tests/transport/TransportChecks.csproj
+$env:EVIDENCE_DIR = Join-Path $evidenceRoot 'web'
+npm test --prefix apps/web
+$env:EVIDENCE_DIR = Join-Path $evidenceRoot 'android'
+npm run test:android --prefix apps/mobile
+Remove-Item Env:EVIDENCE_DIR
+```
+
+Para o último comando, mantenha Android desbloqueado/autorizado e Metro do **TalkToMe** na porta 8081. Em outro terminal, inicie-o com `cd apps/mobile`, `$env:CI='1'` e `npm run start`: CI evita recarregamentos durante a automação. O harness abre Expo Go e configura reverse 5002/8081. Não use simultaneamente o aparelho ou outro Metro nessa porta. Ao terminar, encerre Metro com Ctrl+C e remova somente os redirecionamentos usados: `adb -s SERIAL reverse --remove tcp:5002` e `adb -s SERIAL reverse --remove tcp:8081` (use o caminho completo do ADB se necessário).
+
+Relatórios e ressalvas da rodada do Gate 4: [PROGRESS](docs/PROGRESS.md), [checks](docs/evidence/gate4/checks.json) e [segurança](docs/evidence/gate4/security-analysis.md). Testes via Edge/ADB são automatizados; não equivalem a uma avaliação manual humana.
+
 ## Documentação
 
 - [Arquitetura](docs/ARCHITECTURE.md)
@@ -144,4 +170,4 @@ No dispositivo físico, preferir USB/reverse: dispensa IP LAN e alteração de f
 - [Progresso, ambiente e riscos](docs/PROGRESS.md)
 - [Identidade visual Web/Mobile](docs/UI_UX.md)
 
-Sem banco, Docker obrigatório, publicação ou histórico persistente. ACK indica aceitação pelo backend remoto, nunca entrega/leitura. Gate 4 depende de revisão e autorização explícita.
+Sem banco, Docker obrigatório, publicação ou histórico persistente. ACK indica aceitação pelo backend remoto, nunca entrega/leitura. Gate 4 concluído para revisão humana, com riscos de dependências explicitados; nenhuma publicação automática.

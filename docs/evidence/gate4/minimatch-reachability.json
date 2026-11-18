@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-11-18T03:34:53.376Z",
+  "fingerprintVersion": "0.21.10",
+  "minimatchVersion": "10.2.6",
+  "options": {
+    "dot": true
+  },
+  "effectiveOptimizationLevel": 1,
+  "matchesExpectedFile": true,
+  "files": {
+    "@expo/fingerprint/build/Options.js": {
+      "sha256": "10cb6cd906c815751c9dacaf6580d691354e78fc57366c94f008495a198c2092",
+      "relevantLines": [
+        {
+          "line": 168,
+          "text": "    // { dot: true }, leaving optimizationLevel at its default of 1. The vulnerable preprocessing"
+        },
+        {
+          "line": 169,
+          "text": "    // requires optimizationLevel >= 2, which fingerprint config does not expose."
+        },
+        {
+          "line": 171,
+          "text": "    return (0, _Path.buildPathMatchObjects)(ignorePaths);"
+        }
+      ]
+    },
+    "@expo/fingerprint/build/utils/Path.js": {
+      "sha256": "9fda9128a2961e8cfd708f0a473a201d463d21cb7bfa8bb41c4ce2604a23dfa6",
+      "relevantLines": [
+        {
+          "line": 85,
+          "text": "    dot: true"
+        },
+        {
+          "line": 91,
+          "text": "    dot: true"
+        },
+        {
+          "line": 96,
+          "text": "    dot: true"
+        },
+        {
+          "line": 101,
+          "text": "    dot: true"
+        }
+      ]
+    },
+    "minimatch/dist/commonjs/index.js": {
+      "sha256": "d224f71f20d7c206fcc5b7e9f747324c7698345a0b2c28d717dd9cf698306783",
+      "relevantLines": [
+        {
+          "line": 341,
+          "text": "        const { optimizationLevel = 1 } = this.options;"
+        },
+        {
+          "line": 342,
+          "text": "        if (optimizationLevel >= 2) {"
+        },
+        {
+          "line": 347,
+          "text": "        else if (optimizationLevel >= 1) {"
+        },
+        {
+          "line": 661,
+          "text": "        const { optimizationLevel = 1 } = this.options;"
+        },
+        {
+          "line": 662,
+          "text": "        if (optimizationLevel >= 2) {"
+        }
+      ]
+    }
+  }
+}

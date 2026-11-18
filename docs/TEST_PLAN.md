@@ -1,5 +1,19 @@
 # Plano de testes
 
+## Gate 4 — regressão executada em 18/11/2026
+
+**Rodadas finais aprovadas:** 18 grupos de integração backend, quatro checks de transporte, oito cenários Web, seis testes Mobile e dez cenários no Android físico. Ambos builds .NET sem avisos/erros; Web typecheck/lint/build; Mobile typecheck/export e Expo Doctor 20/20. Não equivale a testes manuais humanos.
+
+- [Resultados backend](evidence/gate4/backend-final/gate1-results.json), [Web W01–W08](evidence/gate4/web-final/results.json) e [Android M01–M10/IDs](evidence/gate4/android/android-results.json).
+- [Comandos/checks e falhas iniciais de ambiente](evidence/gate4/checks.json). Falhas de sandbox foram repetidas fora dele; não são aprovação da primeira tentativa.
+- `EVIDENCE_DIR` opcional aponta a pasta de cada rodada; instruções no README. Não sobrescrever evidências históricas. Testes de backend/Web/Android usam as mesmas portas e devem executar sequencialmente.
+- Android físico Samsung SM-A055M/Android 15, Expo Go, ADB por USB; Edge real isolado. M03 usa ambas APIs reais; M09 usa peer autenticado controlado para perda de ACK. Sem APK próprio.
+- Auditorias Web/Mobile completas e omit=dev, integração npm e NuGet das APIs executadas. [Segurança, advisories, alcance e decisão](evidence/gate4/security-analysis.md). Alertas remanescentes não foram classificados como resolvidos.
+- UI/UX conferida por código, testes e capturas: login, autoria, feedback, teclado, limites, responsividade e rolagem. Revisão humana recomendada: fazer login nas duas telas, conversar nos dois sentidos, usar Tab/Enter, digitar com teclado virtual e avaliar conforto de leitura; TalkBack/fonte ampliada ainda NÃO EXECUTADOS.
+- Permanecem não executados: emulador/iOS, outros dispositivos/navegadores, carga/rede degradada reais, TLS/produção, APK próprio e encerramento sob carga. Não apresentar esses cenários como aprovados.
+
+As seções seguintes são históricas; o estado atual e as ressalvas estão no início de PROGRESS.
+
 ## Gate 3 — Android físico e transporte Mobile
 
 **Execução final aprovada: 10/10 cenários físicos e 6/6 testes do transporte.** Android: 17/11/2026, 23:15:06–23:21:30 (São Paulo). Corrigidos handshake Origin e rolagem antes da aprovação. Build/exportação, TypeScript e Expo Doctor aprovados; não houve geração de APK próprio.

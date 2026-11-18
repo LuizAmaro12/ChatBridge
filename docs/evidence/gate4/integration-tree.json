@@ -1,0 +1,14 @@
+﻿{
+  "name": "talktome-backend-integration",
+  "dependencies": {
+    "ws": {
+      "version": "8.23.0",
+      "resolved": "https://registry.npmjs.org/ws/-/ws-8.23.0.tgz",
+      "overridden": false,
+      "dependencies": {
+        "bufferutil": {},
+        "utf-8-validate": {}
+      }
+    }
+  }
+}
