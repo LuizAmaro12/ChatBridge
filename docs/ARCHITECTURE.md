@@ -1,4 +1,4 @@
-# Arquitetura planejada — Gate 0
+# Arquitetura — Gate 1
 
 ```mermaid
 flowchart LR
@@ -20,7 +20,7 @@ Web API inicia a única conexão persistente para `ws://localhost:5002/internal/
 | InterbackendTransport | Handshake, conexão, ACK pendente, timeout, deduplicação e reconexão |
 | DTOs e opções | Contrato explícito e configuração validada no startup |
 
-Endpoints finos; DI por responsabilidade. Não compartilhar regras de negócio entre APIs. DTOs inicialmente locais; `shared/contracts` aponta à especificação única. Logs estruturados com messageId e transições de conexão, sem senha, JWT, chave ou query string de autenticação.
+Implementação: Program.cs compõe endpoints/DI; Auth/AuthService valida credenciais e emite JWT; Configuration/ChatOptions valida configuração; Chat/ChatService valida chat; ClientHub administra sessões e filas; MessageCache deduplica; Transport/SocketConnection serializa envios/limita mensagens; PeerTransport gerencia o canal. Não compartilhar regras de negócio entre APIs. DTOs locais em Contracts/Events.cs; `shared/contracts` aponta à especificação única. Logs estruturados com messageId e transições de conexão, sem senha, JWT, chave ou query string de autenticação.
 
 ## Autenticação
 
@@ -34,7 +34,7 @@ Web API usa `Authorization: Bearer <chave-de-serviço>` no handshake interbacken
 
 ## Fluxos simétricos
 
-Web → Mobile: cliente envia `chat.send`; Web API valida e enriquece; envia `chat.message` no canal interno; Mobile API valida origem web, deduplica, tenta publicar nos sockets locais ativos e retorna ACK de recepção; Web API correlaciona e repassa ACK ao remetente.
+Web → Mobile: cliente envia `chat.send`; Web API valida e enriquece; envia `chat.message` no canal interno; Mobile API valida origem web, deduplica e aceita a mensagem, retornando ACK de recepção; Web API correlaciona e repassa ACK ao remetente. A distribuição aos clientes locais ocorre de forma independente, com falhas tratadas, sem aguardar clientes lentos nem bloquear a leitura interbackend. O ACK não depende da conclusão dessa distribuição.
 
 Mobile → Web: mesmo fluxo invertido, usando a conexão que a Web API já iniciou. Recepção interbackend nunca reencaminha mensagem ao outro backend. Não criar duas conexões espelhadas. O remetente mantém sua mensagem local pendente e atualiza pelo ACK; não há eco para ele. Outras sessões da mesma conta de origem não recebem sincronização no MVP.
 
@@ -47,3 +47,9 @@ Canal ausente: erro imediato correlacionado. ACK não recebido em 5s: resultado 
 Web API tenta conectar com timeout de 5s e backoff 1, 2, 4, 8, 16, 30 segundos, limitado a 30s com jitter de até 20% dentro do teto; reset após conexão estável por 30s. Heartbeat de aplicação a cada 10s; ausência de pong em 10s derruba o canal. Apenas uma tentativa ativa. Clientes podem reconectar com backoff equivalente enquanto token válido; expiração exige login.
 
 Recepção deve continuar lendo ACKs sem aguardar o ACK do próprio envio. Um lock de envio por socket; no máximo 100 ACKs pendentes por API (erro busy além disso). Limitar envio individual a 2s e remover cliente lento/encerrado; falha de cliente não derruba o canal entre APIs. Shutdown cancela loops, timeouts e esperas, encerra sockets e remove registros em finally. Sem fila persistente.
+
+Cada cliente tem fila de saída em memória de 100 eventos, consumida por um writer exclusivo. Publicação local usa TryWrite, sem espera; fila cheia cancela/remove cliente lento. Limite padrão de 100 clientes por API (excesso fecha WS com 1008) e 100 operações simultâneas por cliente. Filas são efêmeras, não representam broker ou entrega garantida. RequestAborted e ApplicationStopping cancelam os loops. Na expiração, CloseOutput 1008 permite ao leitor observar resposta do peer por até 2s antes de cancelar.
+
+## Configuração efetiva
+
+`.env.example` contém nomes; scripts PowerShell carregam `.env` apenas no processo. `Auth__TokenSeconds=3600` substitui o placeholder TokenMinutes do Gate 0. Heartbeat padrão 10s, ACK 5s, retenção 600s, cache 10000. Os testes reduzem heartbeat/retenção e limites em processos específicos, registrando essa diferença. Contas do protocolo são web-demo/mobile-demo; não renomeá-las isoladamente, pois o receptor valida a identidade demo esperada. `GET /health` informa vida e estado do canal; não é prova de entrega.

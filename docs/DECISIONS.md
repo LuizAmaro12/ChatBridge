@@ -1,5 +1,16 @@
 # Decisões — 17/11/2026
 
+## Concretizadas no Gate 1
+
+- SDK oficial Microsoft 10.0.404 instalado com autorização, assinatura e SHA512 verificados; SDK 9.0.301 preservado. global.json local fixa SDK estável. Pacote JwtBearer 10.0.15 e lockfiles NuGet; harness usa ws 8.23.0 com lockfile npm.
+- Refinamento solicitado: ACK remoto não espera publicação para dispositivos. ClientHub apenas enfileira em buffers limitados; writers isolados têm timeout de 2s. Isso preserva a aceitação remota mesmo sem cliente conectado ou quando ele é lento.
+- Mantidas duas aplicações sem referência de uma API à outra e sem biblioteca de regras comum. Implementações locais de autenticação/transporte/DTOs têm correspondência deliberada para cumprir o isolamento aprovado. Custo: corrigir os dois lados em conjunto, verificado por comparação de arquivos e regressão em ambos os sentidos. Extração futura só com responsabilidade e autorização claras.
+- Configuração local gerada com segredos aleatórios, sem senha fixa no código. Scripts PowerShell restauram variáveis do processo; não modificam ambiente global. TokenSeconds substitui TokenMinutes para permitir teste rápido de expiração; padrão permanece uma hora.
+- Testes de chat usam duas APIs reais; peer WS controlado apenas para suprimir ACK/pong e injetar erros. Socket simulado apenas em quatro testes de concorrência/cancelamento. Não apresentar essas simulações como prova de entrega entre APIs.
+- Corrida real identificada na regressão: cancelamento imediato de ReceiveAsync após CloseOutput podia produzir 1006 na expiração. Corrigido com janela limitada para a resposta de fechamento antes de cancelar. Integração repetida após correção.
+
+As decisões abaixo preservam o registro histórico do Gate 0; instalação e implementação agora seguem o estado acima.
+
 Propostas para revisão do Gate 0; detalhes operacionais em ARCHITECTURE e MESSAGE_CONTRACT. Nenhum conflito identificado entre avaliação e guia. Interpretações: uma conexão full-duplex satisfaz bidirecionalidade; ACK de backend não é entrega ao usuário; prazo corresponde a 19/11/2026 às 13h em São Paulo.
 
 | Decisão | Problema / alternativas | Justificativa e consequência |
