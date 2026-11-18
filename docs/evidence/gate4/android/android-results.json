@@ -1,0 +1,178 @@
+{
+  "started": "2026-11-18T03:31:12.850Z",
+  "device": {
+    "serial": "R9XX104V6HZ",
+    "model": "SM-A055M",
+    "android": "15"
+  },
+  "results": [
+    {
+      "id": "M01 campos obrigatórios e login inválido",
+      "status": "passed"
+    },
+    {
+      "id": "M02 login Mobile real e conexão autenticada",
+      "status": "passed"
+    },
+    {
+      "id": "M03 Web → Android e Android → Web com autoria e ACK",
+      "status": "passed"
+    },
+    {
+      "id": "M04 vazio e limite de 2000 caracteres",
+      "status": "passed"
+    },
+    {
+      "id": "M05 Web API indisponível, rascunho e recuperação",
+      "status": "passed"
+    },
+    {
+      "id": "M06 Mobile API indisponível e reconexão",
+      "status": "passed"
+    },
+    {
+      "id": "M07 segundo plano e retorno preservam rascunho",
+      "status": "passed"
+    },
+    {
+      "id": "M09 ACK suprimido por peer de teste: incerto e sem replay",
+      "status": "passed"
+    },
+    {
+      "id": "M10 textos multilinha, longos e rolagem preservada",
+      "status": "passed"
+    },
+    {
+      "id": "M08 logout limpa sessão; expiração real exige novo login",
+      "status": "passed"
+    }
+  ],
+  "flows": [
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "f81a1f5c-40b7-4361-b704-71c5375f189e",
+      "content": "Ola Android! Mensagem enviada pelo navegador real."
+    },
+    {
+      "direction": "Android → browser",
+      "type": "chat.message",
+      "messageId": "dbefb22b-9adf-4c1d-8340-058cbd09da58",
+      "roomId": "general",
+      "senderId": "mobile-demo",
+      "senderName": "Usuário Mobile",
+      "origin": "mobile",
+      "content": "Ola Web! Resposta enviada pelo Android fisico.",
+      "timestamp": "2026-11-18T03:32:28.4174353Z"
+    },
+    {
+      "direction": "Android → controlled test peer (ACK deliberately suppressed)",
+      "type": "chat.message",
+      "messageId": "62457a3e-89df-4153-a718-2a69d440d4ca",
+      "roomId": "general",
+      "senderId": "mobile-demo",
+      "senderName": "Usuário Mobile",
+      "origin": "mobile",
+      "content": "Mensagem com ACK suprimido",
+      "timestamp": "2026-11-18T03:36:17.9129324Z",
+      "observedSendCount": 1
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "3aafbffb-1c61-48b1-86ac-40e4b861647a",
+      "content": "Primeira linha\nSegunda linha"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "610d5d77-7182-46f0-b857-edcd49663284",
+      "content": "Mensagem de rolagem 0 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "598373a8-547d-4ffc-b001-a10e36a0248c",
+      "content": "Mensagem de rolagem 1 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "9b4b72a9-3f4c-408d-bd02-4268b430f529",
+      "content": "Mensagem de rolagem 2 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "de0a7605-3482-4907-9cc9-1651f7be125e",
+      "content": "Mensagem de rolagem 3 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "c501df38-14bf-4875-8d3d-623db46d78ab",
+      "content": "Mensagem de rolagem 4 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "4979e592-8de2-46f1-9991-9d9cfe000f92",
+      "content": "Mensagem de rolagem 5 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "12936337-b309-4e1a-982f-c74b03b410a6",
+      "content": "Mensagem de rolagem 6 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "57916482-0be1-4388-acda-2017d1f7552a",
+      "content": "Mensagem de rolagem 7 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "196ef5a4-c14c-471c-b701-35c2fc8982b1",
+      "content": "Mensagem de rolagem 8 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "89131570-8540-4378-9a6e-ddc90fba6f70",
+      "content": "Mensagem de rolagem 9 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "22326b0b-178a-4ceb-81df-9a2267307dd5",
+      "content": "Mensagem de rolagem 10 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "19949ce5-7961-4978-a973-d622b2f305ae",
+      "content": "Mensagem de rolagem 11 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "9034a042-7a2f-427b-84ca-ce6ebd19939c",
+      "content": "Mensagem de rolagem 12 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "3950160b-84bd-41ed-85e3-77e8d5954298",
+      "content": "Mensagem de rolagem 13 - texto longo texto longo texto longo texto longo texto longo texto longo texto longo texto longo"
+    },
+    {
+      "direction": "browser → Android",
+      "type": "chat.send",
+      "messageId": "68b6c412-ed36-44b4-b305-8ced28995173",
+      "content": "Nova mensagem enquanto leio anteriores"
+    }
+  ],
+  "finished": "2026-11-18T03:37:34.981Z"
+}

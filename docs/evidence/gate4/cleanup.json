@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-11-18T03:40:28.656Z",
+  "applicationPortsListening": [],
+  "portCheck": "Get-NetTCPConnection: nenhuma escuta em 3000/5001/5002/8081 ap?s encerramento",
+  "adb": [
+    {
+      "args": [
+        "devices",
+        "-l"
+      ],
+      "status": null,
+      "error": "ETIMEDOUT",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "-s",
+        "R9XX104V6HZ",
+        "reverse",
+        "--remove",
+        "tcp:5002"
+      ],
+      "status": null,
+      "error": "ETIMEDOUT",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "-s",
+        "R9XX104V6HZ",
+        "reverse",
+        "--remove",
+        "tcp:8081"
+      ],
+      "status": null,
+      "error": "ETIMEDOUT",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "-s",
+        "R9XX104V6HZ",
+        "reverse",
+        "--list"
+      ],
+      "status": null,
+      "error": "ETIMEDOUT",
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

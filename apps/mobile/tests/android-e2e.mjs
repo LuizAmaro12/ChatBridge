@@ -8,7 +8,7 @@ import path from 'node:path';
 import { chromium, expect } from '../../web/node_modules/@playwright/test/index.mjs';
 import WebSocket from '../../../tests/integration/node_modules/ws/wrapper.mjs';
 const root = path.resolve(import.meta.dirname, '../../..');
-const output = path.join(root, 'docs/evidence/gate3');
+const output = process.env.EVIDENCE_DIR ? path.resolve(process.env.EVIDENCE_DIR) : path.join(root, 'docs/evidence/gate3');
 mkdirSync(output, { recursive: true });
 const adbPath = path.join(process.env.LOCALAPPDATA, 'Android/Sdk/platform-tools/adb.exe');
 const attached = execFileSync(adbPath, ['devices'], { windowsHide: true }).toString()

@@ -1,0 +1,108 @@
+{
+  "checkedAt": "2026-11-18T03:30:07.532Z",
+  "gitHead": "5a8e302b43efe83613d6f4623bb7c031f9692cbe",
+  "trackedFiles": 119,
+  "localSecretValuesCompared": 6,
+  "secretMatches": [],
+  "ignoredPaths": [
+    "services/web-api/.env",
+    "services/mobile-api/.env",
+    "apps/web/.env.local",
+    "apps/mobile/.env.local",
+    "apps/web/next-env.d.ts",
+    "apps/web/test-results/.last-run.json"
+  ],
+  "equivalentBackendSources": [
+    {
+      "file": "services/web-api/Auth/AuthService.cs",
+      "equal": true
+    },
+    {
+      "file": "services/web-api/Chat/ChatService.cs",
+      "equal": true
+    },
+    {
+      "file": "services/web-api/Chat/ClientHub.cs",
+      "equal": true
+    },
+    {
+      "file": "services/web-api/Chat/MessageCache.cs",
+      "equal": true
+    },
+    {
+      "file": "services/web-api/Configuration/ChatOptions.cs",
+      "equal": true
+    },
+    {
+      "file": "services/web-api/Contracts/Events.cs",
+      "equal": true
+    },
+    {
+      "file": "services/web-api/Transport/PeerTransport.cs",
+      "equal": true
+    },
+    {
+      "file": "services/web-api/Transport/SocketConnection.cs",
+      "equal": true
+    }
+  ],
+  "hashes": {
+    "AGENTS.md": "88546466519b85aaaff32378f68fb6c9b99f330dec5ae752bc9ddfb129baa629",
+    "Avaliacao.MD": "a9412dc6020e9ed432662c3305852f57ca048a61c4bab22afc391ddaa98490b2",
+    "apps/mobile/package-lock.json": "5cc6daf071560f43dea82c2c62a9161d75a1911114d6608f0bedc93aa802b2c3",
+    "apps/web/package-lock.json": "a30f92d04c799f46c9f555e3a81398beb310336fe02ba0fe46173a43db9dbcaf",
+    "services/mobile-api/packages.lock.json": "4ab5bb437da48b098503573938dfc85300dc4b4c52adc297dd80ca6817499cd7",
+    "services/web-api/packages.lock.json": "4ab5bb437da48b098503573938dfc85300dc4b4c52adc297dd80ca6817499cd7",
+    "tests/integration/package-lock.json": "39e85d8f75c6472cf45173b9574c706d81ce5d8245c48cf63ca15c796dad7918"
+  },
+  "audits": {
+    "web-full": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 12,
+      "critical": 0,
+      "total": 12
+    },
+    "web-production": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "mobile-full": {
+      "info": 0,
+      "low": 0,
+      "moderate": 2,
+      "high": 25,
+      "critical": 0,
+      "total": 27
+    },
+    "mobile-production": {
+      "info": 0,
+      "low": 0,
+      "moderate": 2,
+      "high": 25,
+      "critical": 0,
+      "total": 27
+    },
+    "integration-full": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "integration-production": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  }
+}

@@ -1,5 +1,78 @@
 # Progresso — ChatBridge
 
+## Gate 4 — resultado final (18/11/2026)
+
+**APROVADO COM RESSALVAS para avaliação local do MVP.** Regressão funcional aprovada; dependências npm ainda têm alertas conhecidos. Não é aprovação para produção nem declaração de segurança total. Nenhum commit, push, merge ou deploy realizado.
+
+### Diagnóstico, escopo e alterações
+
+Git inicialmente limpo em main, HEAD `5a8e302b43efe83613d6f4623bb7c031f9692cbe`. Documentação obrigatória, fontes dos quatro componentes, configurações/lockfiles e evidências anteriores revisados. [Diagnóstico anterior às mudanças](evidence/gate4/diagnostic.md).
+
+Não houve atualização de pacote nem alteração funcional em APIs, Web ou Mobile. Quatro arquivos de testes passaram a aceitar destino opcional `EVIDENCE_DIR`: `tests/integration/run.mjs`, `apps/web/tests/web.spec.ts`, `apps/web/tests/reporter.mjs`, `apps/mobile/tests/android-e2e.mjs`. Isso permite repetir os mesmos cenários sem sobrescrever os Gates anteriores. Reporter importa `node:process` explicitamente para cumprir lint. README, DECISIONS, TEST_PLAN e PROGRESS atualizados; novas evidências somente em `docs/evidence/gate4/`. Avaliacao.MD, AGENTS.md, contrato e lockfiles preservados.
+
+### Segurança: análise concluída, alertas não resolvidos
+
+| Projeto | Auditoria completa | Sem dev | Resultado |
+|---|---|---|---|
+| Web | 12 altos | 0 | Picomatch em ferramentas de lint; permanece |
+| Mobile | 27: 25 altos/2 moderados | 27: 25 altos/2 moderados | Picomatch e minimatch transitivos; permanecem |
+| tests/integration | 0 | 0 | Sem alertas conhecidos |
+| Duas APIs/NuGet | Nenhum pacote vulnerável listado, incluindo transitivos | — | Consultas exit 0 |
+
+Mobile tinha 28 no histórico; `@react-native/community-cli-plugin` deixou de aparecer como pacote afetado na resposta atual, sem alteração de dependências. **Não é uma vulnerabilidade corrigida.** Quantidade de advisories distintos continua dois.
+
+Picomatch **2.3.2/4.0.7**, GHSA-fc5q-39xc-vjpf / CVE-2026-112366: não há patch publicado na consulta; npm informa 4.0.7 como última versão. Minimatch **10.2.6**, GHSA-g3hv-75wg-m249 / CVE-2026-118764: corrigido em 11.0.1+, mas Expo 58.0.26/fingerprint 0.21.10 ainda exigem ^10.2.6. Fingerprint padrão usa otimização 1; condição vulnerável exige >=2, confirmado no código e helper instalado. Nenhum caminho do conteúdo do chat até essas funções foi identificado; isso não prova ausência de toda possibilidade de exploração ou presença/ausência exaustiva no bundle.
+
+**Decisão:** manter versões compatíveis e registrar o risco, sem override, downgrade, major ou audit fix --force. [Análise detalhada, fontes oficiais, cadeias, versões e opções](evidence/gate4/security-analysis.md). Se houver exigência de zero alertas, esse critério continua bloqueado; uma atualização major isolada de minimatch não resolve picomatch. Recomenda-se avaliação em ambiente local confiável com ressalvas, acompanhando correções dos mantenedores.
+
+### Comandos e resultados reais
+
+Ambiente: Windows x64, Node 24.18.0, npm 11.16.0, SDK 10.0.404 com SDK 9.0.301 preservado. Next 16.4.6/React 19.3.1; Expo 58.0.26/RN 0.88.1/React 19.3.0. Android físico Samsung SM-A055M, Android 15, serial R9XX104V6HZ; Edge isolado/headless, Expo Go real e Metro com CI=1.
+
+| Comando | Resultado final |
+|---|---|
+| `dotnet build services/web-api/ChatBridge.Api.csproj --nologo` | Exit 0; 0 avisos/erros |
+| `dotnet build services/mobile-api/ChatBridge.Api.csproj --nologo` | Exit 0; 0 avisos/erros |
+| `node tests/integration/run.mjs` | Exit 0; **18 grupos aprovados** |
+| `dotnet run --project tests/transport/TransportChecks.csproj` | Exit 0; **4 checks aprovados**, sockets controlados |
+| Web: `npm run typecheck`, `npm run lint`, `npm run build` | Exit 0 em cada check final |
+| Web: `npm test` | Exit 0; **8/8 cenários W01–W08**, 33,7s |
+| Mobile: `npm run typecheck`, `npm test` | Exit 0; **6/6 testes**, 12,54s |
+| Mobile: `npx expo-doctor` | Exit 0; **20/20 checks** |
+| Mobile: `npm run export` | Exit 0; bundle Hermes Android, 621 módulos; não APK |
+| Mobile: `npm run start` com CI=1 | Metro iniciou em localhost:8081; bundle abriu no Android |
+| Mobile: `npm run test:android` | Exit 0; **10/10 cenários M01–M10 físicos** |
+| `npm ls --all --json` nos três projetos | Exit 0; árvores válidas |
+| `npm audit --json` / `--omit=dev --json` por projeto | Exit 1 quando há alertas; exit 0 nos relatórios zerados; tabela acima |
+| `dotnet list ... package --vulnerable --include-transitive --format json` por API | Exit 0; nenhum pacote vulnerável listado |
+| Comparação de segredos locais com 119 arquivos rastreados | Nenhuma ocorrência; `.env` e artefatos temporários ignorados |
+
+Regressão backend: **00:28:14–00:28:43**; Web: **00:29:38–00:30:10**; Android: **00:31:12–00:37:34**, todos em 18/11/2026, America/Sao_Paulo (JSON em UTC). [Checks e falhas de ambiente](evidence/gate4/checks.json), [backend](evidence/gate4/backend-final/gate1-results.json), [Web](evidence/gate4/web-final/results.json), [Android](evidence/gate4/android/android-results.json).
+
+As primeiras execuções no sandbox falharam por acesso a NuGet.Config/EventLog e limpeza dos processos; repetidas fora dele, passaram. A primeira execução de lint detectou import ausente no reporter modificado: corrigido e repetido. ADB precisou de reconexão pelo responsável. Porta 8081 estava ocupada pelo projeto Dope; o responsável encerrou seu Metro antes do teste. Essas falhas estão registradas e não foram mascaradas como sucesso inicial.
+
+Após a rodada, APIs/Next foram encerrados pelo harness e Metro por interrupção. Consulta de portas confirmou nenhuma escuta em 3000/5001/5002/8081. **Pendência operacional:** ADB deixou de responder na limpeza, inclusive a `devices -l`; remoção/listagem de reverse 5002/8081 atingiu timeout e não pôde ser confirmada. Tentativas com limite de 5s encerradas; servidor ADB compartilhado não reiniciado. Reconnectar USB e verificar `adb reverse --list`; remover os dois reverse conforme README se ainda existirem. [Registro da limpeza](evidence/gate4/cleanup.json). Isso ocorreu após M01–M10 aprovados, não invalida a evidência física já gravada.
+
+### Evidência principal: dois sentidos reais
+
+- **Web → Web API → Mobile API → Android:** mensagem “Ola Android! Mensagem enviada pelo navegador real.”, ID `f81a1f5c-40b7-4361-b704-71c5375f189e`, autor Usuário Web visível no dispositivo, ACK mostrado no navegador.
+- **Android → Mobile API → Web API → Web:** mensagem “Ola Web! Resposta enviada pelo Android fisico.”, ID `dbefb22b-9adf-4c1d-8340-058cbd09da58`, identidade `mobile-demo` / Usuário Mobile no envelope real, ACK no app.
+- [Tela Android](evidence/gate4/android/chat-android.png), [navegador](evidence/gate4/android/chat-browser.png), [IDs e resultados](evidence/gate4/android/android-results.json). Browser sem acesso à porta 5002; código/configuração nativos acessam só Mobile API. Não foi feita captura completa de pacotes Android.
+- Processos de APIs/Next iniciados do zero pelo harness com credenciais efêmeras, encerrados/reiniciados nos cenários. Metro local foi iniciado separadamente; comandos de reprodução e ordem operacional dos quatro componentes estão no README. Nenhuma dependência de servidor de aplicação previamente em execução.
+- M09 usa peer controlado autenticado para suprimir ACK, explicitamente separado da prova real M03; um envio observado, estado incerto e ACK tardio ignorado. ACK `remote_received` confirma aceitação do backend, não entrega/leitura.
+
+### UI/UX, riscos e pendências
+
+Capturas reais de login/chat Web e Android, teclado aberto, responsividade e estados incertos inspecionadas; identidade visual aprovada mantida, sem redesign ou controle fictício. Testes cobriram mensagens longas, scroll, autoria, rascunhos e feedback. Nenhuma correção visual foi aplicada sem defeito reproduzido. Capturas de listas roláveis podem mostrar trechos parciais; não representam toda a conversa. Validação automatizada/inspeção do agente não é avaliação manual humana nem certificação WCAG.
+
+P1: revisão humana de conforto de leitura/digitação, navegação por Tab/Enter no Web e TalkBack/fonte ampliada no aparelho continua recomendada. NÃO EXECUTADOS: leitor de tela real, outros aparelhos/navegadores, emulador/iOS, rede degradada real, carga prolongada, APK próprio, produção TLS e encerramento sob carga. Mantidos limites de memória, background, deduplicação temporária e ausência de revogação JWT.
+
+A Mobile API local/exemplo escuta 0.0.0.0:5002; README agora distingue isso de loopback e explica configuração local exclusiva para USB. Não alterado firewall ou `.env`. Dependências não devem processar padrões/configurações não confiáveis; risco residual de ferramentas permanece documentado.
+
+Revisão final: `git diff --check` aprovado; 70 links locais conferidos sem ausências, 24 relatórios JSON então existentes parseados e 164 arquivos rastreados/novos comparados com segredos locais, sem ocorrências. Código do produto, manifests/lockfiles, fontes de verdade e evidências anteriores sem diferenças. [Registro](evidence/gate4/final-review.json). Evidência de limpeza adicionada posteriormente e validada como JSON.
+
+**Próximo passo:** revisão humana deste relatório e das ressalvas para entrega local. Não há novo gate implementado nem apresentação/deploy/publicação preparados automaticamente. Histórico abaixo permanece como registro de cada etapa, inclusive suas pendências à época.
+
 ## Gate 3 — resultado final (17/11/2026)
 
 **Aplicativo React Native/Expo implementado e funcionalmente validado no Android físico. Gate 3 pronto para revisão. Gate 4 NÃO iniciado.** Nenhum commit, push, merge ou deploy. Backends, contrato, Avaliacao.MD, AGENTS.md, UI_UX.md e implementação Web preservados; alterações locais anteriores do Gate 2 mantidas.

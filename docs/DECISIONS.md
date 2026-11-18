@@ -1,5 +1,14 @@
 # Decisões — 17/11/2026
 
+## Gate 4 — estabilização (18/11/2026)
+
+- Arquitetura, protocolo, implementação dos quatro componentes e versões preservados: a regressão não justificou alteração funcional. Ajuste nos quatro arquivos de harness/reporter permite `EVIDENCE_DIR` opcional e preserva evidências históricas; defaults anteriores mantidos.
+- Auditoria investigada por advisory, não por contagem: Web 12 altos/produção 0; Mobile 27 (25 altos/2 moderados) nas duas modalidades. A diferença histórica 28→27 não é correção, pois nenhum pacote mudou. Integração npm e consultas NuGet sem alertas conhecidos.
+- Picomatch 2.3.2/4.0.7: sem versão corrigida publicada na consulta. Minimatch 10.2.6: correção 11.0.1+, mas fingerprint 0.21.10 ainda exige ^10.2.6; caminho padrão usa otimização 1, enquanto advisory exige >=2. Mantidos com risco/alcance documentados, sem downgrade, override ou atualização major. [Análise e opções](evidence/gate4/security-analysis.md).
+- Recomendar avaliação local com ressalvas de dependências; uma exigência de zero alertas permanece não atendida. Upgrade major exigiria aprovação específica e não resolveria o advisory sem patch do picomatch.
+- Revisão de UI preserva a identidade aprovada; teste Edge/ADB e inspeção de capturas não substituem avaliação humana de acessibilidade/conforto. Sem redesign ou feature adicional.
+- Binding Mobile existente 0.0.0.0:5002 explicitado no README: USB não significa loopback exclusivo. Não alterados `.env`, firewall, PATH ou configuração global. Sem deploy, APK obrigatório, apresentação ou operações de publicação no Git.
+
 ## Gate 3 — Android nativo
 
 - Template oficial expo-template-blank-typescript 58.0.35, obtido pelo npm pack para preservar o .env.example preexistente. Expo 58.0.26, React Native 0.88.1 e React 19.3.0 em conjunto; dependências nativas escolhidas via expo install. Lockfile local; sem instalação global. Referências oficiais: [criação](https://docs.expo.dev/get-started/create-a-project/) e [Expo Go Android](https://expo.dev/go?device=true&platform=android&sdkVersion=58).
