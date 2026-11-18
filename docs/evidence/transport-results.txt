@@ -1,0 +1,10 @@
+Command: dotnet run --project tests/transport/TransportChecks.csproj
+Environment: Windows x64; .NET SDK 10.0.404
+Exit code: 0
+PASS serialized sends: 20 sends, max active writers=1
+PASS slow writer: cancelled within configured 2-second timeout
+PASS slow client queue: bounded at 100, publish nonblocking, overflow cancels session
+PASS cancellation: reader/heartbeat stopped and peer removed
+
+These are deterministic checks using a controlled WebSocket implementation.
+Real inter-process chat evidence is in gate1-results.json and gate1-services.txt.

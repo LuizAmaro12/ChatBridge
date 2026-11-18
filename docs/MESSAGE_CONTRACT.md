@@ -1,4 +1,4 @@
-# Contrato JSON v1 — especificação, não implementação
+# Contrato JSON v1 — implementado no Gate 1
 
 UTF-8, nomes case-sensitive. Uma mensagem JSON por mensagem WebSocket lógica; aceitar fragmentação acumulando no máximo 16 KiB, inclusive no canal interno. Exceder limite fecha conexão com 1009; binário fecha com 1003. JSON inválido gera erro controlado; não derruba API. `type` obrigatório em todos os eventos. `messageId` UUID não vazio em eventos de chat, exceto erro sem ID recuperável (`null`). Eventos de conexão não usam ID de chat.
 
@@ -35,13 +35,14 @@ Todos obrigatórios: strings, UUID válido, timestamp UTC ISO 8601 terminado em 
 { "type": "chat.ack", "messageId": "550e8400-e29b-41d4-a716-446655440000", "status": "remote_received" }
 ```
 
-Campos obrigatórios; status literal. API remota envia após validar e aceitar mensagem e tentar publicação local limitada por timeout. Zero clientes conectados também resulta em ACK. API origem só repassa ACK de pendência conhecida e peer esperado. ACK desconhecido/tardio é descartado com log de diagnóstico, sem alterar uma falha já exibida.
+Campos obrigatórios; status literal. API remota envia após receber, validar e aceitar a mensagem. A tentativa de publicação local é independente: sua conclusão e eventuais clientes lentos não atrasam o ACK nem bloqueiam a leitura interbackend. Falhas de publicação são tratadas separadamente e não transformam aceitação remota em confirmação de entrega. Zero clientes conectados também resulta em ACK. API origem só repassa ACK de pendência conhecida e peer esperado. ACK desconhecido/tardio é descartado com log de diagnóstico, sem alterar uma falha já exibida.
 
 | Etapa | Evidência | Texto/efeito |
 |---|---|---|
 | Cliente enviou | Chamada local de envio | Enviando |
 | API origem aceitou | Validação interna; sem ACK de sucesso antecipado | Continua Enviando |
 | API remota aceitou | chat.ack remote_received | Recebida pelo outro backend |
+| Publicação local tentada | Enfileiramento efêmero por cliente; pode falhar independentemente | Nenhuma confirmação adicional |
 | Dispositivo recebeu/leu | Não há protocolo de confirmação do dispositivo | Não afirmar entrega ou leitura |
 
 ## Erros
@@ -89,3 +90,5 @@ Somente entre APIs, nonce UUID obrigatório, pong ecoa nonce; ping a cada 10s, t
 Chave `(origin, senderId, messageId)`, retenção 10 minutos, limite 10.000 entradas por API incluindo pendências. Reserva atômica antes de publicação; guardar conteúdo normalizado e resposta final. Duplicata idêntica em andamento compartilha resultado; já concluída repete resposta sem republicar. Conteúdo diferente gera duplicate_conflict. Cache cheio sem entradas expiradas: busy, sem expulsar entradas válidas. API origem também evita encaminhar novamente ID retido, incluindo falhas de resultado incerto; nova tentativa explícita com novo ID pode duplicar conteúdo.
 
 Reinício ou expiração perde deduplicação. Nenhum replay automático após reconexão; nenhum histórico para clientes offline. Clientes também unem mensagens visíveis pelo ID e origem. Sem loop porque só chat.send local inicia encaminhamento.
+
+Limites implementados adicionais: 100 conexões de cliente por API, 100 eventos na fila de saída por cliente, 100 operações locais simultâneas por cliente e 100 ACKs pendentes por API. Cliente lento é removido/cancelado, sem reverter ACK remoto já emitido. As UIs e sua deduplicação visual serão implementadas nos gates 2/3.

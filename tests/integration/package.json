@@ -1,0 +1,11 @@
+{
+  "name": "talktome-backend-integration",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "dependencies": {
+    "ws": "8.23.0"
+  }
+}
